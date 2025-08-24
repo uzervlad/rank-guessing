@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { env } from '$env/dynamic/public';
 	import favicon from '$lib/assets/favicon.svg';
 	import User from '$lib/components/User.svelte';
 
@@ -7,6 +8,7 @@
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
+	<title>{env.PUBLIC_TITLE}</title>
 </svelte:head>
 
 <User user={data.user} />
