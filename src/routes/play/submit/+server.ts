@@ -3,6 +3,7 @@ import { requests } from "$lib/server/db/schema";
 import { API } from "$lib/server/osu";
 import type { RequestHandler } from "@sveltejs/kit";
 import { eq } from "drizzle-orm";
+import { _updateSubmissions } from "../count/+server";
 
 export type SubmissionResponse = {
   username: string;
@@ -37,6 +38,8 @@ export const POST: RequestHandler = async ({ locals, request }) => {
       ready: false,
     })
     .where(eq(requests.id, id));
+
+  _updateSubmissions();
 
   return new Response(JSON.stringify({
     username: user.username,

@@ -2,6 +2,7 @@ import { db } from "$lib/server/db";
 import { beatmaps, requests } from "$lib/server/db/schema";
 import type { RequestHandler } from "@sveltejs/kit";
 import { eq, sql } from "drizzle-orm";
+import { _updateSubmissions } from "../count/+server";
 
 export const GET: RequestHandler = async ({ url, locals }) => {
   if (!locals.user?.isPlaying)
@@ -52,6 +53,8 @@ export const DELETE: RequestHandler = async ({ url, locals }) => {
 
   await db.delete(requests)
     .where(eq(requests.id, +id));
+
+  _updateSubmissions();
 
   return new Response();
 };

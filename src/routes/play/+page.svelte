@@ -9,11 +9,16 @@
 
   import { type SubmissionResponse } from "./submit/+server";
   import type { EventHandler } from "svelte/elements";
+  import { sseListen } from "$lib/sse";
+  import { onMount } from "svelte";
 
   let { data } = $props();
 
   let inputId = $state('');
   let guess = $state('');
+
+  let submissions = $state(0);
+  let submissionsError = $state('');
 
   let request = $state<typeof requests.$inferSelect | null>(null);
   let beatmap = $state<typeof beatmaps.$inferSelect | null>(null);
@@ -70,6 +75,23 @@
     request = null;
     beatmap = null;
   };
+
+  const handleSubmissionsUpdate = (data: any) => {
+    submissions = data.count;
+  };
+
+  onMount(async () => {
+    const response = await fetch('/play/count');
+
+    if (!response.body) {
+      submissionsError = "Unable to update submissions count";
+      return;
+    }
+
+    const reader = response.body.getReader();
+    sseListen(reader, handleSubmissionsUpdate);
+  });
+
 </script>
 
 <main>
@@ -92,6 +114,14 @@
       </Button>
     </a>
   </div>
+
+  <span class="count">
+    {#if submissionsError !== ""}
+      {submissionsError}
+    {:else}
+      {submissions} {submissions === 1 ? "submission" : "submissions"}
+    {/if}
+  </span>
 
   <div class="fetch">
     <Button onclick={getRandom}>
@@ -221,6 +251,11 @@
     justify-content: center;
     align-items: center;
     gap: 8px;
+    margin: 4px;
+  }
+
+  .count {
+    margin: 4px;
   }
 
   .fetch {
@@ -229,7 +264,7 @@
     justify-content: center;
     align-items: center;
     gap: 8px;
-    margin: 20px;
+    margin: 4px;
 
     @media screen and (max-width: 420px) {
       flex-direction: column;
@@ -276,6 +311,7 @@
     max-width: 100vw;
     justify-content: center;
     align-items: center;
+    margin: 4px;
 
     > div {
       width: 400px;

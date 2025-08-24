@@ -5,6 +5,7 @@ import { analyzeReplay, anonymizeReplay } from "$lib/server/replay";
 import type { RequestHandler } from "@sveltejs/kit";
 import { eq } from "drizzle-orm";
 import fs from "fs";
+import { _updateSubmissions } from "../play/count/+server";
 
 export const POST: RequestHandler = async ({ fetch, locals, request }) => {
   if (!locals.user) {
@@ -131,6 +132,8 @@ export const POST: RequestHandler = async ({ fetch, locals, request }) => {
           .where(eq(requests.id, req.id));
 
         sendEvent({ message: 'Upload complete', done: true, id: req.id });
+
+        _updateSubmissions();
       } catch (err) {
         console.log(err);
         sendEvent({ error: 'Error occured during upload' });

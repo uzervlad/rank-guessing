@@ -78,7 +78,7 @@
     }
   };
 
-  const handleUploadMessage = async (message: any) => {
+  const handleUploadMessage = (message: any) => {
     if (message.error) {
       uploadError = message.error;
       uploading = false;
