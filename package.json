@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "@sveltejs/adapter-auto": "^6.0.0",
+    "@sveltejs/adapter-node": "^5.3.1",
     "@sveltejs/kit": "^2.22.0",
     "@sveltejs/vite-plugin-svelte": "^6.0.0",
     "@types/jsonwebtoken": "^9.0.10",
