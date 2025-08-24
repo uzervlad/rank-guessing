@@ -32,7 +32,10 @@ export const POST: RequestHandler = async ({ locals, request }) => {
   if (!user)
     return new Response("Internal Server Error", { status: 500 });
 
-  await db.delete(requests)
+  await db.update(requests)
+    .set({
+      ready: false,
+    })
     .where(eq(requests.id, id));
 
   return new Response(JSON.stringify({
