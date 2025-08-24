@@ -1,4 +1,4 @@
-node_modules/
-replays/
+node_modules
+/replays
 .env
 guess.db
