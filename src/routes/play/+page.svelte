@@ -98,7 +98,7 @@
       Random
     </Button>
     <input
-      type="text"
+      type="number"
       bind:value={inputId}
       placeholder="ID"
     />
@@ -183,7 +183,11 @@
           </a>
           <span>Your guess:</span>
           <form onsubmit={submitGuess}>
-            <input type="number" bind:value={guess}>
+            <input
+              type="number"
+              bind:value={guess}
+              placeholder="Rank"
+            >
             <div>
               <Button variant='submit' type="submit">
                 Submit
@@ -240,6 +244,16 @@
     border-radius: 4px;
 
     text-align: center;
+
+    &:focus {
+      border-color: #888;
+      outline: none;
+    }
+
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      appearance: none;
+    }
   }
 
   .error {
