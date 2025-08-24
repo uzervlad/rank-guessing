@@ -1,0 +1,28 @@
+import { env } from "$env/dynamic/private";
+import type { Handle } from "@sveltejs/kit";
+import jwt from 'jsonwebtoken';
+
+export type Payload = {
+  id: number,
+  username: string,
+  isPlaying: boolean,
+};
+
+export const handle: Handle = async ({ event, resolve }) => {
+  const token = event.cookies.get("guess-token");
+
+  if (!token) {
+    event.locals.user = null;
+    return resolve(event);
+  }
+
+  try {
+    const payload = jwt.verify(token, env.JWT_SECRET) as Payload;
+    event.locals.user = payload;
+  } catch {
+    event.cookies.delete("guess-token", { path: '/' });
+    event.locals.user = null;
+  }
+
+  return resolve(event);
+}
