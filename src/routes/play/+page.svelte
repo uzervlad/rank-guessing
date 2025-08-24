@@ -86,7 +86,13 @@
         {/if}
       </Button>
     </a>
+    <a href="/play/reset">
+      <Button variant='danger'>
+        Delete all submissions
+      </Button>
+    </a>
   </div>
+
   <div class="fetch">
     <Button onclick={getRandom}>
       Random
