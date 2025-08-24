@@ -35,8 +35,6 @@ export async function analyzeReplay(buffer: Buffer): Promise<AnalysisResult> {
   if (!replay.info.isLegacyScore) {
     clientState = ClientState.LazerDefault;
 
-    console.log(replay.info);
-
     if (replay.info.apiMods.some(isModLazer)) {
       clientState = ClientState.LazerMods;
     } 
