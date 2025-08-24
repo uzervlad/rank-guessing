@@ -5,10 +5,10 @@
   import Clapperboard from "@lucide/svelte/icons/clapperboard";
   import CircleX from "@lucide/svelte/icons/circle-x";
 
-  import type { ChangeEventHandler, DragEventHandler, MouseEventHandler } from "svelte/elements";
+  import type { DragEventHandler } from "svelte/elements";
 
   import Loader from "$lib/components/Loader.svelte"
-    import { sseListen } from "$lib/sse.js";
+  import { sseListen } from "$lib/sse.js";
 
   let { data } = $props();
 
@@ -96,7 +96,9 @@
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <main>
   <h1>{env.PUBLIC_TITLE}</h1>
-  {#if !data.request}
+  {#if !data.open}
+    <h2>Rank guessing is currently closed</h2>
+  {:else if !data.request}
     <h2>Send a replay</h2>
     <input
       bind:this={input}

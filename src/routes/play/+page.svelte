@@ -10,6 +10,8 @@
   import { type SubmissionResponse } from "./submit/+server";
   import type { EventHandler } from "svelte/elements";
 
+  let { data } = $props();
+
   let inputId = $state('');
   let guess = $state('');
 
@@ -74,6 +76,17 @@
   <h1>{env.PUBLIC_TITLE}</h1>
   <h2>Guess the rank!</h2>
 
+  <div>
+    <a href="/play/toggle">
+      <Button variant='secondary'>
+        {#if data.open}
+          Close submissions
+        {:else}
+          Open submissions
+        {/if}
+      </Button>
+    </a>
+  </div>
   <div class="fetch">
     <Button onclick={getRandom}>
       Random
@@ -193,7 +206,7 @@
   @use "sass:color";
 
   .fetch {
-    margin-bottom: 20px;
+    margin: 20px;
   }
 
   input {
