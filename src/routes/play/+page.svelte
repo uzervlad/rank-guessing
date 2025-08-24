@@ -128,47 +128,47 @@
           <ul>
             {#if request.client_state == 'stable'}
             <li>
-              <CircleCheck color="#32d232" /> Stable replay
+              <CircleCheck color="#32d232" /> <span title="Score was set in stable">Stable replay</span>
             </li>
             {:else if request.client_state == 'lazer'}
             <li>
-              <CircleCheck color="#32d232" /> Lazer replay
+              <CircleCheck color="#32d232" /> <span title="Score was set in lazer">Lazer replay</span>
             </li>
             {:else}
             <li>
-              <CircleAlert color="yellow" /> Lazer replay (with lazer mods)
+              <CircleAlert color="yellow" /> <span title="Score was set with lazer-specific mods">Lazer replay (with lazer mods)</span>
             </li>
             {/if}
 
             {#if request.user_state == 'same_user'}
             <li>
-              <CircleCheck color="#32d232" /> User matches
+              <CircleCheck color="#32d232" /> <span title="User ID in replay matches submitter's ID">User matches</span>
             </li>
             {:else if request.user_state == 'other_user'}
             <li>
-              <CircleX color="red" /> User doesn't match 
+              <CircleX color="red" /> <span title="User ID in replay doesn't match submitter's ID">User doesn't match</span>
             </li>
             {:else if request.online_state !== 'available'}
             <li>
-              <CircleAlert color="yellow" /> Can't verify user
+              <CircleAlert color="yellow" /> <span title="[Stable] Unable to check user due to score not being available online">Can't verify user</span>
             </li>
             {:else}
             <li>
-              <CircleAlert color="yellow" /> No user (offline play)
+              <CircleAlert color="yellow" /> <span title="No user ID present, likely offline score">No user</span>
             </li>
             {/if}
 
             {#if request.online_state == 'available'}
             <li>
-              <CircleCheck color="#32d232" /> Online score matches
+              <CircleCheck color="#32d232" /> <span title="Score ID is present in replay and is available online">Online score available</span>
             </li>
             {:else if request.online_state == 'unavailable'}
             <li>
-              <CircleAlert color="yellow" /> Online score unavailable
+              <CircleAlert color="yellow" /> <span title="Score ID is present in replay but unavailable online">Online score unavailable</span>
             </li>
             {:else}
             <li>
-              <CircleX color="red" /> No score ID
+              <CircleX color="red" /> <span title="No score ID in replay, potentially offline score">No score ID</span>
             </li>
             {/if}
           </ul>
@@ -339,6 +339,11 @@
       display: flex;
       align-items: center;
       gap: 8px;
+
+      span {
+        text-decoration: underline dotted #999 1px;
+        cursor: help;
+      }
     }
   }
 </style>
