@@ -144,6 +144,11 @@
     display: none;
   }
 
+  h1, h2, span {
+    padding: 0 8px;
+    text-align: center;
+  }
+
   .dropzone {
     min-width: 250px;
     min-height: 80px;

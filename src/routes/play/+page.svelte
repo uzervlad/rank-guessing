@@ -76,7 +76,7 @@
   <h1>{env.PUBLIC_TITLE}</h1>
   <h2>Guess the rank!</h2>
 
-  <div>
+  <div class="settings">
     <a href="/play/toggle">
       <Button variant='secondary'>
         {#if data.open}
@@ -211,8 +211,25 @@
 <style lang="scss">
   @use "sass:color";
 
+  .settings {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+  }
+
   .fetch {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
     margin: 20px;
+
+    @media screen and (max-width: 420px) {
+      flex-direction: column;
+    }
   }
 
   input {
@@ -241,6 +258,10 @@
 
   .request {
     display: flex;
+    flex-wrap: wrap;
+    max-width: 100vw;
+    justify-content: center;
+    align-items: center;
 
     > div {
       width: 400px;
@@ -250,6 +271,12 @@
       justify-content: center;
       align-items: center;
       gap: 8px;
+    }
+
+    @media screen and (max-width: 420px) {
+      > div {
+        width: calc(100vw - 16px);
+      }
     }
   }
 
