@@ -5,7 +5,7 @@ import { eq, sql } from "drizzle-orm";
 import { _updateSubmissions } from "../count/+server";
 
 export const GET: RequestHandler = async ({ url, locals }) => {
-  if (!locals.user?.isPlaying)
+  if (!locals.isPlaying)
     return new Response("Unauthorized", { status: 401 });
 
   const id = url.searchParams.get('id');
@@ -43,7 +43,7 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 };
 
 export const DELETE: RequestHandler = async ({ url, locals }) => {
-  if (!locals.user?.isPlaying)
+  if (!locals.isPlaying)
     return new Response("Unauthorized", { status: 401 });
 
   const id = url.searchParams.get('id');

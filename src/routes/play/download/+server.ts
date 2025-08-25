@@ -3,7 +3,7 @@ import type { RequestHandler } from "@sveltejs/kit";
 import fs from "fs";
 
 export const GET: RequestHandler = async ({ url, locals }) => {
-  if (!locals.user?.isPlaying)
+  if (!locals.isPlaying)
     return new Response("Unauthorized", { status: 401 });
 
   const id = url.searchParams.get('id');

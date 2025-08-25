@@ -8,6 +8,7 @@ declare global {
 		// interface Error {}
 		interface Locals {
 			user: Payload | null;
+			isPlaying: boolean;
 		}
 		// interface PageData {}
 		// interface PageState {}

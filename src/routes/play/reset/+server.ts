@@ -4,7 +4,7 @@ import { redirect, type Actions, type RequestHandler } from "@sveltejs/kit";
 import { _updateSubmissions } from "../count/+server";
 
 export const POST: RequestHandler = async ({ locals }) => {
-  if (!locals.user?.isPlaying)
+  if (!locals.isPlaying)
     return new Response("Unauthorized", { status: 401 });
 
   await db.delete(requests);

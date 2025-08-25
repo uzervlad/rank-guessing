@@ -23,7 +23,7 @@ export async function _updateSubmissions() {
 }
 
 export const GET: RequestHandler = async ({ request, locals }) => {
-  if (!locals.user?.isPlaying)
+  if (!locals.isPlaying)
     return new Response("Unauthorized", { status: 401 });
 
   let send: Subscriber;

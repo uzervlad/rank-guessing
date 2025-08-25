@@ -5,11 +5,12 @@ import jwt from 'jsonwebtoken';
 export type Payload = {
   id: number,
   username: string,
-  isPlaying: boolean,
 };
 
 export const handle: Handle = async ({ event, resolve }) => {
   const token = event.cookies.get("guess-token");
+
+  event.locals.isPlaying = false;
 
   if (!token) {
     event.locals.user = null;
@@ -19,6 +20,7 @@ export const handle: Handle = async ({ event, resolve }) => {
   try {
     const payload = jwt.verify(token, env.JWT_SECRET) as Payload;
     event.locals.user = payload;
+    event.locals.isPlaying = payload.id === +env.PLAYER_ID;
   } catch {
     event.cookies.delete("guess-token", { path: '/' });
     event.locals.user = null;

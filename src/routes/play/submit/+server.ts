@@ -12,7 +12,7 @@ export type SubmissionResponse = {
 };
 
 export const POST: RequestHandler = async ({ locals, request }) => {
-  if (!locals.user?.isPlaying)
+  if (!locals.isPlaying)
     return new Response("Unauthorized", { status: 401 });
 
   const { id, guess } = await request.json();

@@ -36,10 +36,8 @@ export const GET: RequestHandler = async ({ url, fetch, cookies }) => {
     },
   }).then(r => r.json());
 
-  const isPlaying = user.id == private_env.PLAYER_ID;
-
   const jwtToken = jwt.sign({
-    id: user.id, username: user.username, isPlaying,
+    id: user.id, username: user.username,
   }, private_env.JWT_SECRET, {
     expiresIn: '7d',
   });
@@ -54,7 +52,7 @@ export const GET: RequestHandler = async ({ url, fetch, cookies }) => {
   return new Response(null, {
     status: 302,
     headers: {
-      'Location': isPlaying ? '/play' : '/request',
+      'Location': '/',
     },
   });
 };
