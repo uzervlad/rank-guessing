@@ -9,7 +9,7 @@
   const handleSubmit = async (ev: SubmitEvent) => {
     ev.preventDefault();
 
-    await fetch('/play/title', {
+    await fetch('/play/message', {
       method: 'POST',
       body: JSON.stringify({ message }),
     });
