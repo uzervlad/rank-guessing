@@ -65,6 +65,8 @@
         guess: +guess,
       }),
     }).then(r => r.json());
+
+    guess = '';
   };
 
   const deleteRequest = async () => {
