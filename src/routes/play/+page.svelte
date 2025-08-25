@@ -18,6 +18,7 @@
   let guess = $state('');
 
   let submissions = $state(0);
+  let readySubmissions = $state(0);
   let submissionsError = $state('');
 
   let request = $state<typeof requests.$inferSelect | null>(null);
@@ -78,6 +79,7 @@
 
   const handleSubmissionsUpdate = (data: any) => {
     submissions = data.count;
+    readySubmissions = data.ready;
   };
 
   onMount(async () => {
@@ -119,7 +121,7 @@
     {#if submissionsError !== ""}
       {submissionsError}
     {:else}
-      {submissions} {submissions === 1 ? "submission" : "submissions"}
+      {submissions} {submissions === 1 ? "submission" : "submissions"} ({readySubmissions} ready)
     {/if}
   </span>
 

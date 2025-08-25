@@ -3,17 +3,21 @@ import { requests } from "$lib/server/db/schema";
 import type { RequestHandler } from "@sveltejs/kit";
 import { count, eq, sql } from "drizzle-orm";
 
-let submissionsCount = 0;
+let totalSubmissions = 0;
+let readySubmissions = 0;
 
 type Subscriber = () => void;
 const subscribers: Set<Subscriber> = new Set();
 
 export async function _updateSubmissions() {
-  let [{ c }] = await db.select({ c: count() })
-    .from(requests)
-    .where(eq(requests.ready, true));
+  let [{ total, ready }] = await db.select({
+    total: count(),
+    ready: sql<number>`coalesce(sum(case when ${requests.ready} = true then 1 else 0 end), 0)`,
+  })
+    .from(requests);
 
-  submissionsCount = c;
+  totalSubmissions = total;
+  readySubmissions = ready;
 
   for (let send of subscribers) send();
 }
@@ -27,7 +31,7 @@ export const GET: RequestHandler = async ({ request, locals }) => {
   const responseStream = new ReadableStream({
     start(controller) {
       send = function() {
-        controller.enqueue(`${JSON.stringify({ count: submissionsCount })}\n`);
+        controller.enqueue(`${JSON.stringify({ count: totalSubmissions, ready: readySubmissions })}\n`);
       };
 
       send();

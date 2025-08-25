@@ -114,6 +114,8 @@ export const POST: RequestHandler = async ({ fetch, locals, request }) => {
           })
           .returning({ id: requests.id });
 
+        _updateSubmissions();
+
         requestId = req.id;
 
         const anonymousBuffer = await anonymizeReplay(analysis.replay, req.id);
