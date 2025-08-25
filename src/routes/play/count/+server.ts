@@ -12,7 +12,7 @@ const subscribers: Set<Subscriber> = new Set();
 export async function _updateSubmissions() {
   let [{ total, ready }] = await db.select({
     total: count(),
-    ready: sql<number>`coalesce(sum(case when ${requests.ready} = true then 1 else 0 end), 0)`,
+    ready: sql<number>`coalesce(sum(case when ${requests.ready} and ${requests.watched_at} is null = true then 1 else 0 end), 0)`,
   })
     .from(requests);
 

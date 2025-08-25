@@ -1,7 +1,7 @@
 import { db } from "$lib/server/db";
 import { beatmaps, requests } from "$lib/server/db/schema";
 import type { RequestHandler } from "@sveltejs/kit";
-import { eq, sql } from "drizzle-orm";
+import { eq, and, sql, isNull } from "drizzle-orm";
 import { _updateSubmissions } from "../count/+server";
 
 export const GET: RequestHandler = async ({ url, locals }) => {
@@ -19,7 +19,7 @@ export const GET: RequestHandler = async ({ url, locals }) => {
   } else {
     [request] = await db.select()
       .from(requests)
-      .where(eq(requests.ready, true))
+      .where(and(eq(requests.ready, true), isNull(requests.watched_at)))
       .orderBy(sql`RANDOM()`)
       .limit(1);
   }

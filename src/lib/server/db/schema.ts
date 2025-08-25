@@ -39,7 +39,8 @@ export const requests = sqliteTable('requests', {
 	online_state: text().notNull()
 		.$type<OnlineState>(),
 	ready: integer({ mode: 'boolean' }).notNull()
-		.$type<boolean>().default(false),
+		.default(false),
+	watched_at: integer({ mode: 'timestamp' }),
 });
 
 export const beatmaps = sqliteTable('beatmaps', {

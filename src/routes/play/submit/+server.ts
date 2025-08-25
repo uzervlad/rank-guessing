@@ -35,7 +35,7 @@ export const POST: RequestHandler = async ({ locals, request }) => {
 
   await db.update(requests)
     .set({
-      ready: false,
+      watched_at: new Date(),
     })
     .where(eq(requests.id, id));
 

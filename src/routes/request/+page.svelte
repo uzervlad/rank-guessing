@@ -139,6 +139,10 @@
     <h2>You have submitted a replay</h2>
 
     <span class="request">Your ID is: <code>{data.request.id}</code></span>
+
+    {#if data.request.watched_at}
+      <span>Your replay has been watched at {new Date().toLocaleString()}</span>
+    {/if}
   {/if}
 </main>
 
