@@ -99,6 +99,9 @@
   {#if !data.open}
     <h2>Rank guessing is currently closed</h2>
   {:else if !data.request}
+    {#if data.message}
+      <div class="message">{data.message}</div>
+    {/if}
     <h2>Send a replay</h2>
     <input
       bind:this={input}
@@ -140,6 +143,8 @@
 </main>
 
 <style lang="scss">
+  @use "sass:color";
+
   input {
     display: none;
   }
@@ -147,6 +152,13 @@
   h1, h2, .request {
     padding: 0 8px;
     text-align: center;
+  }
+
+  .message {
+    padding: 8px 12px;
+    background: #fff1;
+    border: 1px solid white;
+    border-radius: 6px;
   }
 
   .dropzone {

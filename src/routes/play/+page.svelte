@@ -127,6 +127,11 @@
         Delete all submissions
       </Button>
     </a>
+    <a href="/play/message">
+      <Button>
+        Change message
+      </Button>
+    </a>
   </div>
 
   <span class="count">
