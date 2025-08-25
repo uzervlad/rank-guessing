@@ -21,3 +21,17 @@
     </Button>
   </div>
 </main>
+
+<style lang="scss">
+  h1 {
+    text-align: center;
+  }
+
+  div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    padding: 8px;
+  }
+</style>

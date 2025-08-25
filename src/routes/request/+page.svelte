@@ -135,7 +135,7 @@
   {:else}
     <h2>You have submitted a replay</h2>
 
-    <span>Your ID is: <code>{data.request.id}</code></span>
+    <span class="request">Your ID is: <code>{data.request.id}</code></span>
   {/if}
 </main>
 
@@ -144,7 +144,7 @@
     display: none;
   }
 
-  h1, h2, span {
+  h1, h2, .request {
     padding: 0 8px;
     text-align: center;
   }
