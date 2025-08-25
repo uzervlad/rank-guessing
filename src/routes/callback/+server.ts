@@ -2,10 +2,19 @@ import { env as private_env } from "$env/dynamic/private";
 import { env } from "$env/dynamic/public";
 import type { RequestHandler } from "@sveltejs/kit";
 import jwt from 'jsonwebtoken';
+import { Porro } from 'porro';
+
+const bucket = new Porro({
+  bucketSize: 3,
+  interval: 1500,
+  tokensPerInterval: 1,
+});
 
 export const GET: RequestHandler = async ({ url, fetch, cookies }) => {
   const code = url.searchParams.get('code');
   if (!code) return new Response("Missing authorization code", { status: 400 });
+
+  await bucket.throttle();
 
   const tokenData = await fetch('https://osu.ppy.sh/oauth/token', {
     method: 'POST',
