@@ -29,6 +29,7 @@
 
   const fetchRequest = async (url: string) => {
     error = "";
+    result = null;
     try {
       const { error: err, request: r, beatmap: b } = await fetch(url).then(r => r.json());
       if (err) {
