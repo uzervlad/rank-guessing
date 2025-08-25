@@ -7,10 +7,9 @@ import { eq } from "drizzle-orm";
 import fs from "fs";
 import { _updateSubmissions } from "../play/count/+server";
 
-export const POST: RequestHandler = async ({ fetch, locals, request }) => {
-  if (!locals.user) {
+export const POST: RequestHandler = async ({ locals, request }) => {
+  if (!locals.user)
     return new Response("Unauthorized", { status: 401 });
-  }
 
   const playerId = locals.user.id;
 
@@ -160,4 +159,26 @@ export const POST: RequestHandler = async ({ fetch, locals, request }) => {
       'Connection': 'keep-alive',
     },
   });
+};
+
+export const DELETE: RequestHandler = async ({ locals }) => {
+  if (!locals.user)
+    return new Response("Unauthorized", { status: 401 });
+
+  let [request] = await db.select()
+    .from(requests)
+    .where(eq(requests.player_id, locals.user.id));
+
+  if (!request)
+    return new Response(JSON.stringify({ error: 'No request found' }), { status: 404 });
+
+  if (request.watched_at)
+    return new Response(JSON.stringify({ error: 'Your request was already watched' }), { status: 400 });
+
+  await db.delete(requests)
+    .where(eq(requests.player_id, locals.user.id));
+
+  _updateSubmissions();
+
+  return new Response(JSON.stringify({ ok: true }));
 };

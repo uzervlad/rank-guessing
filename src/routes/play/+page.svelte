@@ -61,7 +61,7 @@
     result = await fetch(`/play/submit`, {
       method: 'POST',
       body: JSON.stringify({
-        id: request.id,
+        player_id: request.player_id,
         guess: +guess,
       }),
     }).then(r => r.json());

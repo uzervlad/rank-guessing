@@ -8,6 +8,7 @@
   import type { DragEventHandler } from "svelte/elements";
 
   import Loader from "$lib/components/Loader.svelte"
+  import Button from "$lib/components/Button.svelte";
   import { sseListen } from "$lib/sse.js";
 
   let { data } = $props();
@@ -90,6 +91,14 @@
     }
     uploadMessage = message.message;
   };
+
+  const cancelRequest = async () => {
+    await fetch('/request', {
+      method: "DELETE",
+    });
+
+    location.reload();
+  };
 </script>
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -142,6 +151,10 @@
 
     {#if data.request.watched_at}
       <span>Your replay has been watched at {new Date().toLocaleString()}</span>
+    {:else}
+      <Button variant='secondary' onclick={cancelRequest}>
+        Cancel request
+      </Button>
     {/if}
   {/if}
 </main>

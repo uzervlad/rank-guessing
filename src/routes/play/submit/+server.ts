@@ -15,19 +15,12 @@ export const POST: RequestHandler = async ({ locals, request }) => {
   if (!locals.isPlaying)
     return new Response("Unauthorized", { status: 401 });
 
-  const { id, guess } = await request.json();
+  const { player_id, guess } = await request.json();
 
-  if (!id || !guess)
+  if (!player_id || !guess)
     return new Response("Bad Request", { status: 400 });
 
-  let [req] = await db.select()
-    .from(requests)
-    .where(eq(requests.id, id));
-
-  if (!req)
-    return new Response("Not Found", { status: 404 });
-
-  const user = await API.getUser(req.player_id);
+  const user = await API.getUser(player_id)
 
   // TODO: proper error handling?
   if (!user)
@@ -37,7 +30,7 @@ export const POST: RequestHandler = async ({ locals, request }) => {
     .set({
       watched_at: new Date(),
     })
-    .where(eq(requests.id, id));
+    .where(eq(requests.player_id, player_id));
 
   _updateSubmissions();
 
