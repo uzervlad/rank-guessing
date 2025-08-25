@@ -46,7 +46,7 @@ export const POST: RequestHandler = async ({ fetch, locals, request }) => {
           return;
         }
 
-        sendEvent({ message: 'Checking replay...' });
+        sendEvent({ message: 'Analyzing replay...' });
 
         const buffer = Buffer.from(await file.arrayBuffer());
 
@@ -57,6 +57,8 @@ export const POST: RequestHandler = async ({ fetch, locals, request }) => {
           controller.close();
           return;
         }
+
+        sendEvent({ message: 'Checking beatmap...' });
 
         const beatmap = await API.getBeatmapByHash(analysis.replay.info.beatmapHashMD5);
 
@@ -84,6 +86,8 @@ export const POST: RequestHandler = async ({ fetch, locals, request }) => {
               version: beatmap.version,
             },
           });
+
+        sendEvent({ message: 'Checking online score...' });
 
         let onlineState = OnlineState.NotPresent;
         if (analysis.onlineId > 0) {
@@ -118,9 +122,9 @@ export const POST: RequestHandler = async ({ fetch, locals, request }) => {
 
         requestId = req.id;
 
-        const anonymousBuffer = await anonymizeReplay(analysis.replay, req.id);
-
         sendEvent({ message: 'Saving replay...' });
+
+        const anonymousBuffer = await anonymizeReplay(analysis.replay, req.id);
 
         if (!fs.existsSync("replays/")) {
           await fs.promises.mkdir('replays/');
