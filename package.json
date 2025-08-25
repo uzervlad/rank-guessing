@@ -36,6 +36,7 @@
     "@lucide/svelte": "^0.541.0",
     "drizzle-orm": "^0.40.0",
     "jsonwebtoken": "^9.0.2",
+    "porro": "^2.2.0",
     "sass": "^1.90.0"
   },
   "trustedDependencies": [
