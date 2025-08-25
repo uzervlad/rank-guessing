@@ -45,6 +45,12 @@ export const POST: RequestHandler = async ({ locals, request }) => {
           return;
         }
 
+        if (!file.name.endsWith(".osr")) {
+          sendEvent({ error: 'Not a replay!' });
+          controller.close();
+          return;
+        }
+
         sendEvent({ message: 'Analyzing replay...' });
 
         const buffer = Buffer.from(await file.arrayBuffer());
