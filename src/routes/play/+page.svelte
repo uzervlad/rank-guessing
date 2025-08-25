@@ -82,16 +82,27 @@
     readySubmissions = data.ready;
   };
 
-  onMount(async () => {
-    const response = await fetch('/play/count');
+  onMount(() => {
+    let reader: ReadableStreamDefaultReader;
 
-    if (!response.body) {
-      submissionsError = "Unable to update submissions count";
-      return;
-    }
+    const listen = async () => {
+      const response = await fetch('/play/count')
+      if (!response.body) {
+        submissionsError = "Unable to update submissions count";
+        return;
+      }
 
-    const reader = response.body.getReader();
-    sseListen(reader, handleSubmissionsUpdate);
+      reader = response.body.getReader();
+      sseListen(reader, handleSubmissionsUpdate);
+    };
+
+    listen();
+
+    return () => {
+      if (reader) {
+        reader.cancel();
+      }
+    };
   });
 
 </script>

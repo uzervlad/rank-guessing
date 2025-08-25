@@ -37,11 +37,9 @@ export const GET: RequestHandler = async ({ request, locals }) => {
       send();
 
       subscribers.add(send);
-      // const keepAlive = setInterval(() => send(), 5000);
 
       request.signal.addEventListener('abort', () => {
         subscribers.delete(send);
-        // clearInterval(keepAlive);
       });
     },
     cancel() {
