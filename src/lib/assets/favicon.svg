@@ -1,10 +1,10 @@
 <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect x="67" y="491.073" width="500" height="95" rx="47.5" transform="rotate(-78 67 491.073)" fill="#F0C535"/>
-<rect x="247" y="491.073" width="500" height="95" rx="47.5" transform="rotate(-78 247 491.073)" fill="#F0C535"/>
-<rect x="6" y="118" width="500" height="95" rx="47.5" fill="#F0C535"/>
-<rect x="6" y="298" width="500" height="95" rx="47.5" fill="#F0C535"/>
-<rect x="107" y="448.259" width="400" height="35" rx="17.5" transform="rotate(-78 107 448.259)" fill="black"/>
-<rect x="287" y="448.259" width="400" height="35" rx="17.5" transform="rotate(-78 287 448.259)" fill="black"/>
-<rect x="56" y="148" width="400" height="35" rx="17.5" fill="black"/>
-<rect x="56" y="328" width="400" height="35" rx="17.5" fill="black"/>
+<rect x="88" y="471.948" width="460" height="95" rx="47.5" transform="rotate(-78 88 471.948)" fill="#F0C535"/>
+<rect x="238" y="470.948" width="460" height="95" rx="47.5" transform="rotate(-78 238 470.948)" fill="#F0C535"/>
+<rect x="26" y="133" width="460" height="95" rx="47.5" fill="#F0C535"/>
+<rect x="26" y="283" width="460" height="95" rx="47.5" fill="#F0C535"/>
+<rect x="123" y="449.26" width="400" height="35" rx="17.5" transform="rotate(-78 123 449.26)" fill="black"/>
+<rect x="273" y="449.26" width="400" height="35" rx="17.5" transform="rotate(-78 273 449.26)" fill="black"/>
+<rect x="56" y="163" width="400" height="35" rx="17.5" fill="black"/>
+<rect x="56" y="313" width="400" height="35" rx="17.5" fill="black"/>
 </svg>
