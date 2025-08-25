@@ -26,6 +26,10 @@ export const GET: RequestHandler = async ({ request, locals }) => {
   if (!locals.isPlaying)
     return new Response("Unauthorized", { status: 401 });
 
+  if (totalSubmissions === 0) {
+    _updateSubmissions();
+  }
+
   let send: Subscriber;
 
   const responseStream = new ReadableStream({
