@@ -9,6 +9,7 @@ declare global {
 		interface Locals {
 			user: Payload | null;
 			isPlaying: boolean;
+			isAdmin: boolean;
 		}
 		// interface PageData {}
 		// interface PageState {}
