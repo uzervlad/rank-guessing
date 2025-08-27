@@ -6,6 +6,7 @@ import type { RequestHandler } from "@sveltejs/kit";
 import { eq } from "drizzle-orm";
 import fs from "fs";
 import { _updateSubmissions } from "../play/count/+server";
+import { submissionsOpen } from "$lib/server/open";
 
 export const POST: RequestHandler = async ({ locals, request }) => {
   if (!locals.user)
@@ -17,6 +18,12 @@ export const POST: RequestHandler = async ({ locals, request }) => {
     async start(controller) {
       function sendEvent(event: any) {
         controller.enqueue(`${JSON.stringify(event)}\n`);
+      }
+
+      if (!submissionsOpen()) {
+        sendEvent({ error: 'Submissions are disabled!' });
+        controller.close();
+        return;
       }
 
       let requestId = 0;
