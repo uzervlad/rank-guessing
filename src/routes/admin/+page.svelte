@@ -5,6 +5,15 @@
   import CircleX from '@lucide/svelte/icons/circle-x';
 
   const { data } = $props();
+
+  const deleteRequest = async (id: number) => {
+    await fetch('/play/replays', {
+      method: "DELETE",
+      body: JSON.stringify({ id }),
+    });
+
+    location.reload();
+  };
 </script>
 
 <main>
@@ -75,7 +84,7 @@
           {/if}
         </td>
         <td>
-          <Button variant='danger'>
+          <Button variant='danger' onclick={() => deleteRequest(requests.id)}>
             Delete
           </Button>
         </td>

@@ -42,11 +42,11 @@ export const GET: RequestHandler = async ({ url, locals }) => {
   });
 };
 
-export const DELETE: RequestHandler = async ({ url, locals }) => {
-  if (!locals.isPlaying)
+export const DELETE: RequestHandler = async ({ request, locals }) => {
+  if (!locals.isPlaying && !locals.isAdmin)
     return new Response("Unauthorized", { status: 401 });
 
-  const id = url.searchParams.get('id');
+  const { id } = await request.json();
 
   if (!id)
     return new Response("Bad Request", { status: 400 });

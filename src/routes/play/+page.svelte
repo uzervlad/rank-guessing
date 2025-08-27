@@ -72,8 +72,9 @@
   const deleteRequest = async () => {
     if (!request) return;
 
-    await fetch(`/play/replays?id=${request.id}`, {
+    await fetch('/play/replays', {
       method: 'DELETE',
+      body: JSON.stringify({ id: request.id }),
     });
 
     request = null;
