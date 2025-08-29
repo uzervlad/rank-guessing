@@ -150,7 +150,7 @@
     <span class="request">Your ID is: <code>{data.request.id}</code></span>
 
     {#if data.request.watched_at}
-      <span>Your replay has been watched at {new Date().toLocaleString()}</span>
+      <span>Your replay was watched at {data.request.watched_at.toLocaleString()}</span>
     {:else}
       <Button variant='secondary' onclick={cancelRequest}>
         Cancel request
