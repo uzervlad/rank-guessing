@@ -1,6 +1,6 @@
 #![allow(unused)]
 
-use std::{fs, sync::Arc, time::Instant};
+use std::{env, fs, sync::Arc, time::Instant};
 
 use axum::{Json, Router, extract::State, routing::get};
 use back::{
@@ -10,19 +10,22 @@ use back::{
 };
 use eyre::Result;
 use serde::Serialize;
+use sqlx::SqlitePool;
 use tokio::net::TcpListener;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-	dotenvy::dotenv()?;
+	let _ = dotenvy::dotenv();
 
-	let state = AxumState::new().await?;
-	let state = Arc::new(state);
+	let db = SqlitePool::connect(&env::var("DATABASE_URL")?).await?;
 
 	#[cfg(not(debug_assertions))]
 	sqlx::migrate!("./migrations")
-		.run(&state.db)
+		.run(&db)
 		.await?;
+
+	let state = AxumState::new(db.clone()).await?;
+	let state = Arc::new(state);
 
 	let app = Router::new()
 		.route("/", get(root))

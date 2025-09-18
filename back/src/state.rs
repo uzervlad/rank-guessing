@@ -169,12 +169,11 @@ pub struct AxumState {
 }
 
 impl AxumState {
-	pub async fn new() -> Result<Self> {
+	pub async fn new(db: SqlitePool) -> Result<Self> {
 		let (tx, _) = broadcast::channel(16);
 
 		let config = Arc::new(AppConfig::new()?);
 
-		let db = SqlitePool::connect(&env::var("DATABASE_URL")?).await?;
 		let state = {
 			let session_id = database::sessions::get_current_session(&db).await?
 				.map(|s| s.id)
