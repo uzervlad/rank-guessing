@@ -1,7 +1,7 @@
 FROM oven/bun:1.2.22-alpine AS builder
 WORKDIR /app
 
-COPY . /app/
+COPY web/ /app/
 
 RUN bun i
 RUN bun pm trust --all
