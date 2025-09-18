@@ -1,0 +1,7 @@
+back/replays
+back/target
+back/.env
+web/node_modules
+web/build
+web/node_modules
+web/.env

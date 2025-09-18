@@ -1,0 +1,5 @@
+hard_tabs = true
+match_arm_leading_pipes = "Preserve"
+match_block_trailing_comma = true
+newline_style = "Unix"
+skip_macro_invocations = ["async_stream::stream"]
