@@ -164,7 +164,6 @@ impl Replay {
 		if let Some(score_info) = &self.score_info {
 			let score_info_bytes = serde_json::to_vec(score_info)?;
 
-			// let mut encoder = XzEncoder::new(Vec::new(), 5);
 			let mut encoder = XzEncoder::new_stream(
 				Vec::new(),
 				Stream::new_lzma_encoder(&LzmaOptions::new_preset(5)?)?,

@@ -24,11 +24,6 @@ struct CallbackQuery {
 	code: String,
 }
 
-// #[derive(Serialize)]
-// struct CallbackResponse {
-// 	token: String,
-// }
-
 async fn osu_callback(
 	State(state): State<AAxumState>,
 	jar: CookieJar,

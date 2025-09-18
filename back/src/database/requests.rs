@@ -195,8 +195,6 @@ pub struct RequestsCount {
 	pub ready: i64,
 }
 
-// select count(*) as total, coalesce(sum(case when ready and watched_at is null then 1 else 0 end), 0) from requests
-
 pub async fn count_requests(pool: &SqlitePool, session_id: i64) -> Result<RequestsCount> {
 	let count = sqlx::query_as::<_, RequestsCount>(
 		r#"
