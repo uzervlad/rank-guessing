@@ -175,12 +175,13 @@ impl AxumState {
 		let config = Arc::new(AppConfig::new()?);
 
 		let state = {
-			let session_id = database::sessions::get_current_session(&db).await?
+			let session_id = database::sessions::get_current_session(&db)
+				.await?
 				.map(|s| s.id)
 				.unwrap_or(0);
 			let count = match session_id {
 				0 => Default::default(),
-				id => database::requests::count_requests(&db, id).await?
+				id => database::requests::count_requests(&db, id).await?,
 			};
 
 			Arc::new(AppState::new(tx, count, session_id))

@@ -6,7 +6,7 @@ use sqlx::{Decode, Encode, Sqlite, Type, sqlite::SqliteTypeInfo};
 
 use crate::replay::Replay;
 
-#[derive(Debug, Serialize)]
+#[derive(Clone, Copy, Debug, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum ClientState {
 	Stable,
@@ -67,7 +67,7 @@ impl<'r> Decode<'r, Sqlite> for ClientState {
 	}
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Clone, Copy, Debug, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum OnlineState {
 	Available,
@@ -128,7 +128,7 @@ impl<'r> Decode<'r, Sqlite> for OnlineState {
 	}
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Clone, Copy, Debug, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum UserState {
 	SameUser,

@@ -3,7 +3,10 @@ use eyre::Result;
 use serde::Serialize;
 use sqlx::{SqlitePool, prelude::FromRow};
 
-use crate::replay::analysis::{ClientState, OnlineState, UserState};
+use crate::{
+	database::beatmaps::DbBeatmap,
+	replay::analysis::{ClientState, OnlineState, UserState},
+};
 
 #[derive(FromRow, Serialize)]
 pub struct DbRequest {
@@ -21,6 +24,86 @@ pub struct DbRequest {
 	pub real_rank: i64,
 }
 
+#[derive(FromRow)]
+pub struct DbRequestWithBeatmap {
+	pub r_id: i64,
+	pub r_player_id: i64,
+	pub r_session_id: i64,
+	pub r_beatmap_id: i64,
+	pub r_client_state: ClientState,
+	pub r_online_state: OnlineState,
+	pub r_user_state: UserState,
+	pub r_ready: bool,
+	pub r_submitted_at: DateTime<Utc>,
+	pub r_watched_at: Option<DateTime<Utc>>,
+	pub r_guessed_rank: i64,
+	pub r_real_rank: i64,
+
+	pub b_id: i64,
+	pub b_beatmapset_id: i64,
+	pub b_title: String,
+	pub b_artist: String,
+	pub b_version: String,
+	pub b_creator: String,
+}
+
+#[derive(Serialize)]
+pub struct RequestWithBeatmap {
+	request: DbRequest,
+	beatmap: DbBeatmap,
+}
+
+impl From<&DbRequestWithBeatmap> for RequestWithBeatmap {
+	fn from(value: &DbRequestWithBeatmap) -> Self {
+		Self {
+			request: DbRequest {
+				id: value.r_id,
+				player_id: value.r_player_id,
+				session_id: value.r_session_id,
+				beatmap_id: value.r_beatmap_id,
+				client_state: value.r_client_state,
+				online_state: value.r_online_state,
+				user_state: value.r_user_state,
+				ready: value.r_ready,
+				submitted_at: value.r_submitted_at,
+				watched_at: value.r_watched_at,
+				guessed_rank: value.r_guessed_rank,
+				real_rank: value.r_real_rank,
+			},
+			beatmap: DbBeatmap {
+				id: value.b_id,
+				beatmapset_id: value.b_beatmapset_id,
+				title: value.b_title.clone(),
+				artist: value.b_artist.clone(),
+				version: value.b_version.clone(),
+				creator: value.b_creator.clone(),
+			},
+		}
+	}
+}
+
+const EXTENDED_SELECT: &'static str = r#"
+	r.id as r_id,
+	r.player_id as r_player_id,
+	r.session_id as r_session_id,
+	r.beatmap_id as r_beatmap_id,
+	r.client_state as r_client_state,
+	r.online_state as r_online_state,
+	r.user_state as r_user_state,
+	r.ready as r_ready,
+	r.submitted_at as r_submitted_at,
+	r.watched_at as r_watched_at,
+	r.guessed_rank as r_guessed_rank,
+	r.real_rank as r_real_rank,
+
+	b.id as b_id,
+	b.beatmapset_id as b_beatmapset_id,
+	b.title as b_title,
+	b.artist as b_artist,
+	b.version as b_version,
+	b.creator as b_creator
+"#;
+
 pub async fn get_request(pool: &SqlitePool, id: i64) -> Result<Option<DbRequest>> {
 	let request = sqlx::query_as::<_, DbRequest>(
 		r#"
@@ -35,32 +118,55 @@ pub async fn get_request(pool: &SqlitePool, id: i64) -> Result<Option<DbRequest>
 	Ok(request)
 }
 
-pub async fn get_requests_by_session(pool: &SqlitePool, session_id: i64) -> Result<Vec<DbRequest>> {
-	let request = sqlx::query_as::<_, DbRequest>(
+pub async fn get_requests_by_session(
+	pool: &SqlitePool,
+	session_id: i64,
+	guessed: bool,
+) -> Result<Vec<RequestWithBeatmap>> {
+	let mut query = format!(
 		r#"
-    select * from requests
-    where session_id = $1
-  "#,
-	)
-	.bind(session_id)
-	.fetch_all(pool)
-	.await?;
+		select {EXTENDED_SELECT} from requests r
+		left join beatmaps b on r.beatmap_id = b.id
+		where r.session_id = $1
+	"#
+	);
 
-	Ok(request)
+	if guessed {
+		query.push_str("and r.watched_at is not null");
+	}
+
+	let request = sqlx::query_as::<_, DbRequestWithBeatmap>(&query)
+		.bind(session_id)
+		.fetch_all(pool)
+		.await?;
+
+	Ok(request
+		.iter()
+		.map(|raw| RequestWithBeatmap::from(raw))
+		.collect())
 }
 
-pub async fn get_requests_by_player(pool: &SqlitePool, player_id: u64) -> Result<Vec<DbRequest>> {
-	let request = sqlx::query_as::<_, DbRequest>(
+pub async fn get_requests_by_player(
+	pool: &SqlitePool,
+	player_id: u64,
+) -> Result<Vec<RequestWithBeatmap>> {
+	let query = format!(
 		r#"
-    select * from requests
-    where player_id = $1
-  "#,
-	)
-	.bind(player_id as i64)
-	.fetch_all(pool)
-	.await?;
+    select {EXTENDED_SELECT} from requests r
+		left join beatmaps b on r.beatmap_id = b.id
+    where r.player_id = $1
+  "#
+	);
 
-	Ok(request)
+	let request = sqlx::query_as::<_, DbRequestWithBeatmap>(&query)
+		.bind(player_id as i64)
+		.fetch_all(pool)
+		.await?;
+
+	Ok(request
+		.iter()
+		.map(|raw| RequestWithBeatmap::from(raw))
+		.collect())
 }
 
 pub async fn get_request_by_session_player(
@@ -145,9 +251,9 @@ pub async fn ready_request(pool: &SqlitePool, request_id: i64) -> Result<()> {
 
 pub async fn mark_as_guessed_request(
 	pool: &SqlitePool,
+	request_id: i64,
 	guessed_rank: u32,
 	real_rank: u32,
-	request_id: i64
 ) -> Result<()> {
 	sqlx::query(
 		r#"

@@ -5,9 +5,7 @@
   let { data } = $props();
 </script>
 
-<Back to='/request' />
-
-<h2>Submissions</h2>
+<Back to='/guess/history' />
 
 <table>
   <thead>
@@ -22,25 +20,29 @@
   {#if data.response}
   <tbody>
     {#each data.response as { request, beatmap }}
-    <tr>
-      <td>{request.id}</td>
-      <td>
-        <a href={`https://osu.ppy.sh/b/${beatmap.id}`}>
-          {beatmap.artist} - {beatmap.title}
-        </a>
-      </td>
-      <td>{new Date(request.submitted_at).toLocaleString()}</td>
-      <td>
-        {#if request.watched_at}
-          {new Date(request.watched_at).toLocaleString()}
-        {/if}
-      </td>
-      <td>
-        {#if request.watched_at}
-          #{request.guessed_rank}
-        {/if}
-      </td>
-    </tr>
+      <tr>
+        <td>
+          <a href={`https://osu.ppy.sh/users/${request.player_id}/osu`} target="_blank">
+            {request.id}
+          </a>
+        </td>
+        <td>
+          <a href={`https://osu.ppy.sh/b/${beatmap.id}`} target="_blank">
+            {beatmap.artist} - {beatmap.title}
+          </a>
+        </td>
+        <td>{new Date(request.submitted_at).toLocaleString()}</td>
+        <td>
+          {#if request.watched_at}
+            {new Date(request.watched_at).toLocaleString()}
+          {/if}
+        </td>
+        <td>
+          {#if request.watched_at}
+            #{request.guessed_rank} / #{request.real_rank}
+          {/if}
+        </td>
+      </tr>
     {/each}
   </tbody>
   {/if}

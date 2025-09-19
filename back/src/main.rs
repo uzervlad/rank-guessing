@@ -20,9 +20,7 @@ async fn main() -> Result<()> {
 	let db = SqlitePool::connect(&env::var("DATABASE_URL")?).await?;
 
 	#[cfg(not(debug_assertions))]
-	sqlx::migrate!("./migrations")
-		.run(&db)
-		.await?;
+	sqlx::migrate!("./migrations").run(&db).await?;
 
 	let state = AxumState::new(db.clone()).await?;
 	let state = Arc::new(state);

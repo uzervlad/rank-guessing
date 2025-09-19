@@ -43,24 +43,15 @@ async fn get_current_request(
 	let Ok(request) =
 		database::requests::get_request_by_session_player(&state.db, session_id, user.id).await
 	else {
-		return (
-			StatusCode::INTERNAL_SERVER_ERROR,
-			"Unknown database error",
-		).into_response()
+		return (StatusCode::INTERNAL_SERVER_ERROR, "Unknown database error").into_response();
 	};
 
 	Json(RequestResponse { request }).into_response()
 }
 
-async fn get_requests(
-	user: UserExtension,
-	State(state): State<AAxumState>
-) -> impl IntoResponse {
+async fn get_requests(user: UserExtension, State(state): State<AAxumState>) -> impl IntoResponse {
 	let Ok(requests) = database::requests::get_requests_by_player(&state.db, user.id).await else {
-		return (
-			StatusCode::INTERNAL_SERVER_ERROR,
-			"Unknown database error"
-		).into_response();
+		return (StatusCode::INTERNAL_SERVER_ERROR, "Unknown database error").into_response();
 	};
 
 	Json(requests).into_response()

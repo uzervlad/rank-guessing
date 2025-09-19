@@ -75,7 +75,7 @@
     result = await fetch(`/api/play/guess`, {
       method: "POST",
       ...headers,
-      body: JSON.stringify({ id: request.id, guess })
+      body: JSON.stringify({ player_id: request.player_id, guess })
     })
       .then(safeResponse<GuessResponse>);
 

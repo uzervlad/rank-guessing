@@ -1,7 +1,12 @@
 use std::sync::atomic::Ordering;
 
 use axum::{
-	extract::{Path, Query, Request, State}, http::{header, HeaderValue, StatusCode}, middleware, response::IntoResponse, routing::{get, post}, Json, Router
+	Json, Router,
+	extract::{Path, Query, Request, State},
+	http::{HeaderValue, StatusCode, header},
+	middleware,
+	response::IntoResponse,
+	routing::{get, post},
 };
 use rosu_v2::model::GameMode;
 use serde::{Deserialize, Serialize};
@@ -84,7 +89,10 @@ async fn delete_request(
 
 			(StatusCode::OK, "OK")
 		},
-		_ => (StatusCode::INTERNAL_SERVER_ERROR, "Unexpected database error"),
+		_ => (
+			StatusCode::INTERNAL_SERVER_ERROR,
+			"Unexpected database error",
+		),
 	}
 }
 
@@ -112,9 +120,7 @@ async fn download_replay(
 	let filename = format!("{id}.osr");
 	let filepath = format!("replays/{filename}");
 	let file = ServeFile::new(filepath);
-	let mut response = file.oneshot(req)
-		.await
-		.into_response();
+	let mut response = file.oneshot(req).await.into_response();
 
 	response.headers_mut().insert(
 		header::CONTENT_DISPOSITION,
@@ -126,7 +132,7 @@ async fn download_replay(
 
 #[derive(Deserialize)]
 struct SubmitGuessBody {
-	id: i64,
+	player_id: u32,
 	guess: u32,
 }
 
@@ -141,45 +147,34 @@ async fn submit_guess(
 	State(state): State<AAxumState>,
 	Json(body): Json<SubmitGuessBody>,
 ) -> impl IntoResponse {
-	let request = match database::requests::get_request(&state.db, body.id).await {
-		Ok(Some(request)) => request,
-		Ok(_) => return (StatusCode::NOT_FOUND, "No request found").into_response(),
-		_ => {
-			return (
-				StatusCode::INTERNAL_SERVER_ERROR,
-				"Unexpected database error",
-			).into_response()
-		},
-	};
-
-	let Ok(user) = state.osu.user(request.player_id as u32)
-		.mode(GameMode::Osu)
-		.await else
-	{
+	let Ok(user) = state.osu.user(body.player_id).mode(GameMode::Osu).await else {
 		return (
 			StatusCode::INTERNAL_SERVER_ERROR,
 			"Unexpected osu! API error",
-		).into_response()
+		)
+			.into_response();
 	};
 
 	let Some(Some(real_rank)) = user.statistics.map(|s| s.global_rank) else {
 		return (
 			StatusCode::INTERNAL_SERVER_ERROR,
 			"User doesn't have a rank",
-		).into_response()
+		)
+			.into_response();
 	};
 
-	let Ok(_) = database::requests::mark_as_guessed_request(
+	if let Ok(Some(request)) = database::requests::get_request_by_session_player(
 		&state.db,
-		body.guess,
-		real_rank,
-		body.id
-	).await else {
-		return (
-			StatusCode::INTERNAL_SERVER_ERROR,
-			"Unexpected database error",
-		).into_response()
-	};
+		state.state.session_id.load(Ordering::SeqCst),
+		body.player_id as u64,
+	)
+	.await
+	{
+		let _ = database::requests::mark_as_guessed_request(
+			&state.db, request.id, body.guess, real_rank,
+		)
+		.await;
+	}
 
 	state.state.ready_sub();
 
@@ -187,7 +182,8 @@ async fn submit_guess(
 		username: user.username.to_string(),
 		rank: real_rank,
 		guess: body.guess,
-	}).into_response()
+	})
+	.into_response()
 }
 
 async fn delete_everything(State(state): State<AAxumState>) -> (StatusCode, &'static str) {

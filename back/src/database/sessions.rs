@@ -85,11 +85,13 @@ pub async fn end_session(pool: &SqlitePool) -> Result<()> {
 }
 
 pub async fn rename_session(pool: &SqlitePool, name: String) -> Result<()> {
-	sqlx::query(r#"
+	sqlx::query(
+		r#"
 		update sessions
 		set title = $1
 		where ended_at is null
-	"#)
+	"#,
+	)
 	.bind(name)
 	.execute(pool)
 	.await?;

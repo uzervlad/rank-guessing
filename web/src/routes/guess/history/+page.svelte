@@ -27,16 +27,16 @@
       <td>{new Date(session.started_at).toLocaleDateString()}</td>
       <td>{session.submissions} ({session.guesses} guessed)</td>
       <td>
-        <!-- <a href={`/guess/history/${session.id}/guesses`}> -->
-          <Button variant='secondary' disabled title="TODO">
+        <a href={`/guess/history/${session.id}?guessed=`}>
+          <Button variant='secondary'>
             Guesses
           </Button>
-        <!-- </a> -->
-        <!-- <a href={`/guess/history/${session.id}/requests`}> -->
-          <Button disabled title="TODO">
+        </a>
+        <a href={`/guess/history/${session.id}`}>
+          <Button>
             Submissions
           </Button>
-        <!-- </a> -->
+        </a>
       </td>
     </tr>
     {/each}

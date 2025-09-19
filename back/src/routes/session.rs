@@ -2,7 +2,7 @@ use std::sync::atomic::Ordering;
 
 use axum::{
 	Json, Router,
-	extract::State,
+	extract::{Path, Query, State},
 	http::StatusCode,
 	middleware,
 	response::IntoResponse,
@@ -24,7 +24,7 @@ struct SessionResponse {
 async fn get_current_session(State(state): State<AAxumState>) -> impl IntoResponse {
 	let session_id = state.state.session_id.load(Ordering::SeqCst);
 	if session_id == 0 {
-		return Json(SessionResponse { session: None }).into_response()
+		return Json(SessionResponse { session: None }).into_response();
 	}
 
 	let Ok(session) = database::sessions::get_current_session(&state.db).await else {
@@ -117,23 +117,60 @@ struct RenameSessionBody {
 
 async fn rename_session(
 	State(state): State<AAxumState>,
-	Json(body): Json<RenameSessionBody>
+	Json(body): Json<RenameSessionBody>,
 ) -> (StatusCode, &'static str) {
 	match database::sessions::rename_session(&state.db, body.name).await {
 		Ok(_) => (StatusCode::OK, "OK"),
-		_ => (StatusCode::INTERNAL_SERVER_ERROR, "Unexpected database error"),
+		_ => (
+			StatusCode::INTERNAL_SERVER_ERROR,
+			"Unexpected database error",
+		),
 	}
+}
+
+#[derive(Deserialize)]
+struct GetRequestsPath {
+	id: i64,
+}
+
+#[derive(Deserialize)]
+struct GetRequestsQuery {
+	guessed: Option<u8>,
+}
+
+async fn get_session_requests(
+	State(state): State<AAxumState>,
+	Path(path): Path<GetRequestsPath>,
+	Query(query): Query<GetRequestsQuery>,
+) -> impl IntoResponse {
+	let Ok(requests) =
+		database::requests::get_requests_by_session(&state.db, path.id, query.guessed.is_some())
+			.await
+	else {
+		return (
+			StatusCode::INTERNAL_SERVER_ERROR,
+			"Unexpected database error",
+		)
+			.into_response();
+	};
+
+	Json(requests).into_response()
 }
 
 pub fn router(state: AAxumState) -> Router<AAxumState> {
 	let protected = Router::new()
-		.route("/", post(start_session).delete(end_session).patch(rename_session))
+		.route(
+			"/",
+			post(start_session)
+				.delete(end_session)
+				.patch(rename_session),
+		)
+		.route("/{id}", get(get_session_requests))
 		.route("/list", get(get_sessions))
 		.layer(middleware::from_fn(auth::guesser_middleware))
 		.layer(middleware::from_fn_with_state(state, auth::user_middleware));
 
-	let non_protected = Router::new()
-		.route("/", get(get_current_session));
+	let non_protected = Router::new().route("/", get(get_current_session));
 
 	protected.merge(non_protected)
 }
