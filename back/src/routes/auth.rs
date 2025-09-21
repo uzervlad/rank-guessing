@@ -9,6 +9,7 @@ use axum::{
 use axum_extra::extract::{CookieJar, cookie::Cookie};
 use rosu_v2::{OsuBuilder, prelude::Scopes};
 use serde::Deserialize;
+use time::OffsetDateTime;
 
 use crate::{
 	auth::{self, AuthorizedUser, UserExtension, encode_jwt},
@@ -56,6 +57,7 @@ async fn osu_callback(
 	let mut cookie = Cookie::new("guess-token", token);
 	cookie.set_path("/");
 	cookie.set_http_only(false);
+	cookie.set_expires(OffsetDateTime::now_utc() + time::Duration::weeks(1));
 
 	let new_jar = jar.add(cookie);
 
