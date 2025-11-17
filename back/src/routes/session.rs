@@ -53,6 +53,7 @@ async fn get_sessions(State(state): State<AAxumState>) -> impl IntoResponse {
 #[derive(Deserialize)]
 struct StartSessionBody {
 	name: String,
+	allow_comments: bool,
 }
 
 #[derive(Serialize)]
@@ -83,7 +84,7 @@ async fn start_session(
 		_ => {},
 	}
 
-	let Ok(id) = database::sessions::create_session(&state.db, body.name).await else {
+	let Ok(id) = database::sessions::create_session(&state.db, body.name, body.allow_comments).await else {
 		return (
 			StatusCode::INTERNAL_SERVER_ERROR,
 			"Unexpected database error",

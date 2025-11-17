@@ -105,12 +105,13 @@ async fn upload_replay(
 	}
 
 	let mut replay_bytes = None;
+	let mut comment = None;
 
 	while let Ok(Some(field)) = multipart.next_field().await {
 		let name = field.name().unwrap_or("");
 
-		if name == "replay" {
-			match field.bytes().await {
+		match name {
+			"replay" => match field.bytes().await {
 				Ok(bytes) => {
 					replay_bytes = Some(bytes.to_vec());
 				},
@@ -123,7 +124,12 @@ async fn upload_replay(
 					)
 						.into_response();
 				},
-			}
+			},
+			"comment" => match field.text().await {
+				Ok(value) => comment = Some(value),
+				_ => {}
+			},
+			_ => {},
 		}
 	}
 
@@ -136,6 +142,18 @@ async fn upload_replay(
 		)
 			.into_response();
 	};
+
+	if let Some(comment) = &comment
+		&& comment.len() > 100
+	{
+		return (
+			StatusCode::BAD_REQUEST,
+			Json(UploadMessage::Error {
+				message: "Comment too long".into()
+			})
+		)
+			.into_response()
+	}
 
 	let stream = async_stream::stream! {
 	  yield send! { UploadMessage::Info { message: "Parsing replay...".into() } };
@@ -200,7 +218,8 @@ async fn upload_replay(
 			session_id,
 			client_state,
 			user_state,
-			online_state
+			online_state,
+			comment.clone(),
 	  ).await else {
 			yield send! { UploadMessage::Error { message: "Unexpected database error".into() } };
 			return;

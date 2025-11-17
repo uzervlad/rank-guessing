@@ -15,4 +15,5 @@ export type ApiRequest = {
   watched_at: string | null;
   guessed_rank: number | null;
   real_rank: number | null;
+  comment: string | null;
 };

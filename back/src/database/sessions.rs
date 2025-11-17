@@ -9,6 +9,7 @@ pub struct DbSession {
 	pub title: String,
 	pub started_at: DateTime<Utc>,
 	pub ended_at: Option<DateTime<Utc>>,
+	pub allow_comments: bool,
 }
 
 #[derive(FromRow, Serialize)]
@@ -53,16 +54,17 @@ pub async fn get_current_session(pool: &SqlitePool) -> Result<Option<DbSession>>
 	Ok(session)
 }
 
-pub async fn create_session(pool: &SqlitePool, title: String) -> Result<i64> {
+pub async fn create_session(pool: &SqlitePool, title: String, allow_comments: bool) -> Result<i64> {
 	let id = sqlx::query_scalar::<_, i64>(
 		r#"
     insert into sessions
-    (title, started_at) values ($1, $2)
+    (title, started_at, allow_comments) values ($1, $2, $3)
 		returning id
   "#,
 	)
 	.bind(&title)
 	.bind(Utc::now())
+	.bind(allow_comments)
 	.fetch_one(pool)
 	.await?;
 

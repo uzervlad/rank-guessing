@@ -13,6 +13,7 @@
   import CircleCheck from "@lucide/svelte/icons/circle-check";
   import CircleAlert from "@lucide/svelte/icons/circle-alert";
   import Back from "$lib/components/Back.svelte";
+  import Spoiler from "$lib/components/Spoiler.svelte";
 
   const { data } = $props();
   
@@ -205,6 +206,13 @@
     </div>
     <div>
       {#if !result}
+        {#if request.comment && data.session?.allow_comments}
+          <Spoiler
+            title="Comment"
+            content={request.comment}
+          />
+        {/if}
+
         <a href={`/api/play/replay/${request.id}`} target="_blank">
           <Button variant='secondary'>
             Download replay
@@ -222,9 +230,9 @@
               Submit
             </Button>
             <!-- does this even need to exist? -->
-            <!-- <Button variant='danger' type="button" onclick={deleteRequest}>
+            <Button variant='danger' type="button" onclick={deleteRequest}>
               Delete
-            </Button> -->
+            </Button>
           </div>
         </form>
       {:else if result.response}
@@ -276,6 +284,7 @@
     max-width: 100vw;
     justify-content: center;
     align-items: center;
+    gap: 16px;
     margin: 4px;
 
     > div {

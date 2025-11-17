@@ -9,11 +9,12 @@ export const actions: Actions = {
 
     const data = await request.formData();
     const name = data.get('name');
+    const allow_comments = !!data.get('allow_comments');
 
     await fetch('/api/session', {
       method: 'POST',
       ...headers,
-      body: JSON.stringify({ name }),
+      body: JSON.stringify({ name, allow_comments }),
     });
 
     throw redirect(302, '/guess/play');

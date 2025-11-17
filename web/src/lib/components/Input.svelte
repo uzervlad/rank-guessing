@@ -1,5 +1,9 @@
 <script lang="ts">
-  let { value = $bindable(), ...props } = $props();
+  let {
+    value = $bindable(),
+    disabled = $bindable(),
+    ...props
+  } = $props();
 </script>
 
 <input class="input" bind:value={value} {...props}>

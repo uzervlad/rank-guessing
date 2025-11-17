@@ -22,6 +22,7 @@ pub struct DbRequest {
 	pub watched_at: Option<DateTime<Utc>>,
 	pub guessed_rank: i64,
 	pub real_rank: i64,
+	pub comment: String,
 }
 
 #[derive(FromRow)]
@@ -38,6 +39,7 @@ pub struct DbRequestWithBeatmap {
 	pub r_watched_at: Option<DateTime<Utc>>,
 	pub r_guessed_rank: i64,
 	pub r_real_rank: i64,
+	pub r_comment: String,
 
 	pub b_id: i64,
 	pub b_beatmapset_id: i64,
@@ -53,8 +55,8 @@ pub struct RequestWithBeatmap {
 	beatmap: DbBeatmap,
 }
 
-impl From<&DbRequestWithBeatmap> for RequestWithBeatmap {
-	fn from(value: &DbRequestWithBeatmap) -> Self {
+impl From<DbRequestWithBeatmap> for RequestWithBeatmap {
+	fn from(value: DbRequestWithBeatmap) -> Self {
 		Self {
 			request: DbRequest {
 				id: value.r_id,
@@ -69,6 +71,7 @@ impl From<&DbRequestWithBeatmap> for RequestWithBeatmap {
 				watched_at: value.r_watched_at,
 				guessed_rank: value.r_guessed_rank,
 				real_rank: value.r_real_rank,
+				comment: value.r_comment,
 			},
 			beatmap: DbBeatmap {
 				id: value.b_id,
@@ -95,6 +98,7 @@ const EXTENDED_SELECT: &'static str = r#"
 	r.watched_at as r_watched_at,
 	r.guessed_rank as r_guessed_rank,
 	r.real_rank as r_real_rank,
+	r.comment as r_comment,
 
 	b.id as b_id,
 	b.beatmapset_id as b_beatmapset_id,
@@ -141,7 +145,7 @@ pub async fn get_requests_by_session(
 		.await?;
 
 	Ok(request
-		.iter()
+		.into_iter()
 		.map(|raw| RequestWithBeatmap::from(raw))
 		.collect())
 }
@@ -164,7 +168,7 @@ pub async fn get_requests_by_player(
 		.await?;
 
 	Ok(request
-		.iter()
+		.into_iter()
 		.map(|raw| RequestWithBeatmap::from(raw))
 		.collect())
 }
@@ -212,12 +216,13 @@ pub async fn create_request(
 	client_state: ClientState,
 	user_state: UserState,
 	online_state: OnlineState,
+	comment: Option<String>,
 ) -> Result<i64> {
 	let id = sqlx::query_scalar::<_, i64>(
 		r#"
     insert into requests
-      (player_id, beatmap_id, session_id, client_state, user_state, online_state, submitted_at)
-      values ($1, $2, $3, $4, $5, $6, $7)
+      (player_id, beatmap_id, session_id, client_state, user_state, online_state, submitted_at, comment)
+      values ($1, $2, $3, $4, $5, $6, $7, $8)
     returning id
   "#,
 	)
@@ -228,6 +233,7 @@ pub async fn create_request(
 	.bind(user_state)
 	.bind(online_state)
 	.bind(Utc::now())
+	.bind(comment)
 	.fetch_one(pool)
 	.await?;
 

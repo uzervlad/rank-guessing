@@ -1,5 +1,6 @@
 <script lang="ts">
   import Button from '$lib/components/Button.svelte';
+  import Input from '$lib/components/Input.svelte';
   import type { DragEventHandler } from 'svelte/elements';
 
   import LoaderPinwheel from "@lucide/svelte/icons/loader-pinwheel";
@@ -10,6 +11,7 @@
 
   const { data } = $props();
 
+  let comment = $state("");
   // svelte-ignore non_reactive_update
   let input: HTMLInputElement;
 
@@ -61,6 +63,7 @@
 
     const form = new FormData();
     form.append("replay", files[0]);
+    form.append("comment", comment);
 
     uploading = true;
 
@@ -130,8 +133,23 @@
   <div class="message">{data.session.title}</div>
   <h2>Send a replay</h2>
 
+  {#if data.session.allow_comments}
+    <div class="comment">
+      <Input
+        bind:value={comment}
+        type="text"
+        placeholder="Comment (optional)"
+        maxlength="100"
+        style="width: 100%"
+        bind:disabled={uploading}
+      />
+      <span class="input-footer">(max 100 characters, please don't spoil)</span>
+    </div>
+  {/if}
+
   <input
     bind:this={input}
+    class="file-input"
     type="file"
     accept=".osr"
     onchange={onInputChange}
@@ -184,7 +202,7 @@
     animation: spin 1.6s linear infinite;
   }
 
-  input {
+  .file-input {
     display: none;
   }
 
@@ -198,6 +216,21 @@
     background: #fff1;
     border: 1px solid white;
     border-radius: 6px;
+  }
+
+  .comment {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+
+    width: min(500px, 100%);
+    margin-bottom: 16px;
+  }
+
+  .input-footer {
+    font-size: 13px;
+    color: #888;
   }
 
   .dropzone {
