@@ -24,7 +24,7 @@ pub struct Claims {
 
 pub fn encode_jwt(secret: &str, user: &UserExtended) -> String {
 	let claims = Claims {
-		exp: (Utc::now() + Duration::hours(24)).timestamp(),
+		exp: (Utc::now() + Duration::weeks(1)).timestamp(),
 		iat: Utc::now().timestamp(),
 		id: user.user_id as u64,
 		username: user.username.to_string(),
