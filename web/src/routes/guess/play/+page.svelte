@@ -205,6 +205,12 @@
               <CircleAlert color="yellow" /> <span title="This replay was submitted during a previous session">Wrong session</span>
             </li>
           {/if}
+
+          {#if request.watched_at}
+            <li>
+              <CircleX color="red" /> <span title="This replay already has been guessed earlier">Watched previously</span>
+            </li>
+          {/if}
         </ul>
       </div>
     </div>
