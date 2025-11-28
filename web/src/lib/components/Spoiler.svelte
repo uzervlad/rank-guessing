@@ -3,7 +3,7 @@
 
 	let symbol = $derived(() => open ? '🔼' : '🔽');
 
-	const { title = '', content = '' } = $props();
+	const { title = '', children } = $props();
 </script>
 
 <div class="spoiler">
@@ -14,7 +14,7 @@
 		onclick={() => open = !open}
 	>{title} {symbol()}</span>
 	{#if open}
-		<span class="content">{content}</span>
+		<span class="content">{@render children?.()}</span>
 	{/if}
 </div>
 

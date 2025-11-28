@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { Emotes } from "$lib/emotes";
   import { sseListen, type Reader } from "$lib/sse";
   import type { ApiRequest } from "$lib/types/request";
   import type { ApiBeatmap } from "$lib/types/beatmap";
@@ -14,9 +15,12 @@
   import CircleAlert from "@lucide/svelte/icons/circle-alert";
   import Back from "$lib/components/Back.svelte";
   import Spoiler from "$lib/components/Spoiler.svelte";
+  import Comment from "$lib/components/Comment.svelte";
 
   const { data } = $props();
   
+  const emotes = new Emotes();
+
   let reader: Reader | undefined;
 
   let readySubmissions = $state(0);
@@ -207,10 +211,12 @@
     <div>
       {#if !result}
         {#if request.comment && data.session?.allow_comments}
-          <Spoiler
-            title="Comment"
-            content={request.comment}
-          />
+          <Spoiler title="Comment">
+            <Comment
+              comment={request.comment}
+              getEmote={emotes.getEmote.bind(emotes)}
+            />
+          </Spoiler>
         {/if}
 
         <a href={`/api/play/replay/${request.id}`} target="_blank">
