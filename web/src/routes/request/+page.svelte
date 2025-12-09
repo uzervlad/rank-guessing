@@ -122,10 +122,10 @@
 
     updateSuccess = true;
 
-    // setTimeout(() => {
-    //   updating = false;
-    //   updateSuccess = false;
-    // }, 2500);
+    setTimeout(() => {
+      updating = false;
+      updateSuccess = false;
+    }, 2500);
   };
 
   const cancelRequest = async () => {
