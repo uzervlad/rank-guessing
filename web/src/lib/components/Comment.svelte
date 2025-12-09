@@ -4,18 +4,14 @@
 	let { comment, getEmote }: { comment: string, getEmote: (name: string) => Emote | undefined } = $props();
 
 	const parseComment = (text: string) => {
-		const parts = text.split(/(:\w+:)/);
+		const words = text.split(' ');
 
-		return parts
+		return words
 			.filter(p => p)
 			.map(p => {
-				if (p.startsWith(":") && p.endsWith(":")) {
-					const emote = getEmote(p.slice(1, -1));
-					if (!emote) return { text: p }
-					return { text: p, emote: emote.url };
-				}
-
-				return { text: p };
+				const emote = getEmote(p);
+				if (!emote) return { text: p }
+				return { text: p, emote: emote.url, zero: emote.zero_width };
 			});
 	};
 
@@ -24,8 +20,14 @@
 
 {#each segments as segment}
 	{#if segment.emote}
-		<img src={segment.emote} alt={segment.text}>
+		<img class="emote" src={segment.emote} alt={segment.text}>{" "}
 	{:else}
-		<span>{segment.text}</span>
+		<span>{segment.text}{" "}</span>
 	{/if}
 {/each}
+
+<style lang="scss">
+	.emote {
+		max-height: 32px;
+	}
+</style>

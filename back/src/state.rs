@@ -6,13 +6,14 @@ use std::{
 	},
 };
 
+use axum::body::Bytes;
 use eyre::Result;
 use rosu_v2::Osu;
 use serde::Serialize;
 use sqlx::SqlitePool;
 use tokio::sync::broadcast::{self, Receiver, Sender};
 
-use crate::database::{self, requests::RequestsCount};
+use crate::{database::{self, requests::RequestsCount}, emotes::fetch_emotes};
 
 pub struct OsuConfig {
 	pub client_id: u64,
@@ -164,6 +165,7 @@ impl ArcAppStateTrait for Arc<AppState> {
 pub struct AxumState {
 	pub config: Arc<AppConfig>,
 	pub state: Arc<AppState>,
+	pub emotes: Bytes,
 	pub db: SqlitePool,
 	pub osu: Osu,
 }
@@ -189,9 +191,14 @@ impl AxumState {
 
 		let osu = config.osu.create_client().await?;
 
+		let emotes = fetch_emotes().await;
+		let emotes = serde_json::to_vec(&emotes)?;
+		let emotes = Bytes::from(emotes);
+
 		Ok(Self {
 			config,
 			state,
+			emotes,
 			db,
 			osu,
 		})

@@ -5,3 +5,4 @@ pub mod routes;
 pub mod database;
 
 pub mod state;
+pub mod emotes;

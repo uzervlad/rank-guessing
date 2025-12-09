@@ -101,6 +101,8 @@
   };
 
   onMount(() => {
+    emotes.init();
+
     (async () => {
       const response = await fetch('/api/state');
   
