@@ -1,17 +1,25 @@
 <script lang="ts">
   import Button from '$lib/components/Button.svelte';
   import Input from '$lib/components/Input.svelte';
+  import { sseListen } from '$lib/sse';
+
   import type { DragEventHandler } from 'svelte/elements';
 
   import LoaderPinwheel from "@lucide/svelte/icons/loader-pinwheel";
   import Upload from "@lucide/svelte/icons/upload";
   import Clapperboard from "@lucide/svelte/icons/clapperboard";
   import CircleX from "@lucide/svelte/icons/circle-x";
-  import { sseListen } from '$lib/sse';
+  import Check from "@lucide/svelte/icons/check";
+  import Ellipsis from "@lucide/svelte/icons/ellipsis";
+    import { headers } from '$lib/fetch.js';
 
   const { data } = $props();
 
-  let comment = $state("");
+  let comment = $state(data.request?.comment ?? '');
+
+  let updating = $state(false);
+  let updateSuccess = $state(false);
+
   // svelte-ignore non_reactive_update
   let input: HTMLInputElement;
 
@@ -103,6 +111,23 @@
     } 
   };
 
+  const updateComment = async () => {
+    updating = true;
+
+    const response = await fetch('/api/request', {
+      method: "PATCH",
+      ...headers,
+      body: JSON.stringify({ comment }),
+    });
+
+    updateSuccess = true;
+
+    // setTimeout(() => {
+    //   updating = false;
+    //   updateSuccess = false;
+    // }, 2500);
+  };
+
   const cancelRequest = async () => {
     await fetch('/api/request', {
       method: "DELETE",
@@ -125,9 +150,33 @@
   {#if data.request.watched_at}
     <span>Your replay was watched at {new Date(data.request.watched_at).toLocaleString()}</span>
   {:else}
-    <Button variant='danger' onclick={cancelRequest}>
-      Cancel request
-    </Button>
+    <div class="comment">
+      <Input
+        bind:value={comment}
+        type="text"
+        placeholder="Comment (optional)"
+        maxlength="100"
+        style="width: 100%"
+        bind:disabled={updating}
+      />
+      <span class="input-footer">max 100 characters, please don't spoil</span>
+      <span class="input-footer">supports FFZ/BTTV/7TV emotes</span>
+    </div>
+
+    <div class="buttons">
+      <Button variant='secondary' bind:disabled={updating} onclick={updateComment}>
+        {#if updating && updateSuccess}
+          <Check style="margin-bottom: -6px;" />
+        {:else if updating}
+          <Ellipsis style="margin-bottom: -6px;" />
+        {:else}
+          Update comment
+        {/if}
+      </Button>
+      <Button variant='danger' onclick={cancelRequest}>
+        Cancel request
+      </Button>
+    </div>
   {/if}
 {:else}
   <div class="message">{data.session.title}</div>
@@ -143,7 +192,8 @@
         style="width: 100%"
         bind:disabled={uploading}
       />
-      <span class="input-footer">(max 100 characters, please don't spoil)</span>
+      <span class="input-footer">max 100 characters, please don't spoil</span>
+      <span class="input-footer">supports FFZ/BTTV/7TV emotes</span>
     </div>
   {/if}
 
@@ -210,6 +260,10 @@
     padding: 0 8px;
     text-align: center;
   }
+  
+  .request {
+    margin-bottom: 6px;
+  }
 
   .message {
     padding: 8px 12px;
@@ -226,6 +280,15 @@
 
     width: min(500px, 100%);
     margin-bottom: 16px;
+  }
+
+  .buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    // align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
   }
 
   .input-footer {

@@ -10,7 +10,7 @@ use axum::{
 	routing::get,
 };
 use rosu_v2::model::GameMode;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use tower_http::limit::RequestBodyLimitLayer;
 
 use crate::{
@@ -290,13 +290,50 @@ async fn delete_request(
 	(StatusCode::OK, "OK")
 }
 
+#[derive(Deserialize)]
+struct ChangeCommentBody {
+	comment: String,
+}
+
+async fn change_comment(
+	user: UserExtension,
+	State(state): State<AAxumState>,
+	Json(body): Json<ChangeCommentBody>,
+) -> (StatusCode, &'static str) {
+	let session_id = state.state.session_id.load(Ordering::SeqCst);
+
+	let request =
+		match database::requests::get_request_by_session_player(&state.db, session_id, user.id)
+			.await
+		{
+			Ok(Some(request)) => request,
+			Ok(_) => return (StatusCode::NOT_FOUND, "No request found"),
+			_ => {
+				return (
+					StatusCode::INTERNAL_SERVER_ERROR,
+					"Unexpected database error",
+				);
+			},
+		};
+
+	let Ok(_) = database::requests::change_request_comment(&state.db, request.id, body.comment).await else {
+		return (
+			StatusCode::INTERNAL_SERVER_ERROR,
+			"Unexpected database error"
+		);
+	};
+
+	(StatusCode::OK, "OK")
+}
+
 pub fn router(state: AAxumState) -> Router<AAxumState> {
 	Router::new()
 		.route(
 			"/",
 			get(get_current_request)
 				.post(upload_replay)
-				.delete(delete_request),
+				.delete(delete_request)
+				.patch(change_comment),
 		)
 		.route("/list", get(get_requests))
 		.layer(DefaultBodyLimit::disable())

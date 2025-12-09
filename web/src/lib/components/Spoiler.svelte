@@ -1,9 +1,9 @@
 <script lang="ts">
-	let open = $state(false);
+	// let open = $state(false);
 
 	let symbol = $derived(() => open ? '🔼' : '🔽');
 
-	const { title = '', children } = $props();
+	let { title = '', open = $bindable(false), children } = $props();
 </script>
 
 <div class="spoiler">

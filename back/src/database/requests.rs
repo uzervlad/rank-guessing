@@ -255,6 +255,22 @@ pub async fn ready_request(pool: &SqlitePool, request_id: i64) -> Result<()> {
 	Ok(())
 }
 
+pub async fn change_request_comment(pool: &SqlitePool, request_id: i64, comment: String) -> Result<()> {
+	sqlx::query(
+		r#"
+		update requests
+		set comment = $1
+		where id = $2
+	"#
+	)
+	.bind(comment)
+	.bind(request_id)
+	.execute(pool)
+	.await?;
+
+	Ok(())
+}
+
 pub async fn mark_as_guessed_request(
 	pool: &SqlitePool,
 	request_id: i64,

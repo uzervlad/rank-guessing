@@ -1,12 +1,12 @@
 <script lang="ts">
   let {
     value = $bindable(),
-    disabled = $bindable(),
+    disabled = $bindable(false),
     ...props
   } = $props();
 </script>
 
-<input class="input" bind:value={value} {...props}>
+<input class="input" bind:value={value} disabled={disabled} {...props}>
 
 <style lang="scss">
   input {

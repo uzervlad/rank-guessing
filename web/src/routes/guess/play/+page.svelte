@@ -38,11 +38,14 @@
   let request = $state<ApiRequest | null>(null);
   let beatmap = $state<ApiBeatmap | null>(null);
 
+  let commentOpen = $state(false);
+
   let result = $state<SafeResponse<GuessResponse> | null>(null);
 
   const fetchRequest = async (id?: number) => {
     let url = id ? `/api/play/request?id=${id}` : '/api/play/request';
 
+    commentOpen = false;
     result = null;
 
     const { response, error: err } = await fetch(url)
@@ -219,7 +222,7 @@
     <div>
       {#if !result}
         {#if request.comment && data.session?.allow_comments}
-          <Spoiler title="Comment">
+          <Spoiler title="Comment" bind:open={commentOpen}>
             <Comment
               comment={request.comment}
               getEmote={emotes.getEmote.bind(emotes)}

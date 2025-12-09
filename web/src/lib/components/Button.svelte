@@ -1,10 +1,10 @@
 <script lang="ts">
   type ButtonVariant = 'primary' | 'secondary' | 'submit' | 'danger';
 
-  let { children, disabled = false, variant = 'primary' , ...props } = $props();
+  let { children, disabled = $bindable(false), variant = 'primary' , ...props } = $props();
 </script>
 
-<button class={variant} class:disabled={disabled} {...props}>
+<button class={variant} class:disabled={disabled} disabled={disabled} {...props}>
   {@render children?.()}
 </button>
 
