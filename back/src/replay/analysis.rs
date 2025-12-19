@@ -96,8 +96,8 @@ pub trait ReplayAnalysisTrait {
 	fn client_state(&self) -> ClientState;
 }
 
-const STABLE_MODS: [&str; 12] = [
-	"EZ", "NF", "HT", "HR", "SD", "PF", "DT", "NC", "HD", "FL", "RX", "AP",
+const STABLE_COMPATIBLE_MODS: [&str; 13] = [
+	"EZ", "NF", "HT", "DC", "HR", "SD", "PF", "DT", "NC", "HD", "FL", "RX", "AP",
 ];
 
 #[derive(Deserialize)]
@@ -108,7 +108,24 @@ struct ScoreInfoMod {
 
 impl ScoreInfoMod {
 	fn is_stable(&self) -> bool {
-		STABLE_MODS.iter().any(|m| m == &self.acronym) && self.settings.is_none()
+		STABLE_COMPATIBLE_MODS.iter().any(|m| m == &self.acronym)
+			&& self.is_settings_stable_compatible()
+	}
+
+	fn is_settings_stable_compatible(&self) -> bool {
+		if self.settings.is_none() {
+			return true
+		}
+
+		let Some(Value::Object(settings)) = &self.settings else {
+			return true
+		};
+
+		match self.acronym.as_str() {
+			"DT" | "HT" | "NC" | "DC" => !settings.contains_key(&"speed_change".to_string()),
+			"SD" | "PF" => true,
+			_ => false,
+		}
 	}
 }
 
