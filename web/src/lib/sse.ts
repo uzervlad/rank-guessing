@@ -8,15 +8,16 @@ export async function sseListen(reader: Reader, onMessage: SSEMessageHandler) {
 
   function processLines() {
     let lines = buffer.split("\n");
-    buffer = lines.pop() || "";
+    buffer = "";
     
     for (const line of lines) {
       if (line.trim().length > 0) {
         try {
           const message = JSON.parse(line);
           onMessage(message);
-        } catch(err) {
-          // idk
+        } catch (err) {
+          // this is fucking stupid but will have to do for now
+          buffer = line;
         }
       }
     }

@@ -173,6 +173,25 @@ pub async fn get_requests_by_player(
 		.collect())
 }
 
+pub async fn get_last_request_by_player(
+	pool: &SqlitePool,
+	player_id: u64,
+) -> Result<Option<DbRequest>> {
+	let request = sqlx::query_as::<_, DbRequest>(
+		r#"
+		select * from requests
+		where player_id = $1
+		order by id desc
+		limit 1
+	"#,
+	)
+	.bind(player_id as i64)
+	.fetch_optional(pool)
+	.await?;
+
+	Ok(request)
+}
+
 pub async fn get_request_by_session_player(
 	pool: &SqlitePool,
 	session_id: i64,

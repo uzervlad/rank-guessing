@@ -22,6 +22,7 @@
 
   // svelte-ignore non_reactive_update
   let input: HTMLInputElement;
+  let link = $state('');
 
   let uploading = $state(false);
   let uploadMessage = $state('...');
@@ -49,29 +50,33 @@
 
     let files = ev.dataTransfer?.files;
     if (files) {
-      handleUpload(files);
+      handleUpload("replay", files[0]);
     }
   };
   
   const onInputChange = () => {
     if (!input.files) return;
 
-    handleUpload(input.files);
+    handleUpload("replay", input.files[0]);
 
     input.value = null!;
   };
 
-  const handleUpload = async (files: FileList) => {
-    const file = files[0];
-
-    if (!file.name.endsWith(".osr")) {
+  const handleUpload = async (type: string, file?: File) => {
+    if (file && !file.name.endsWith(".osr")) {
       uploadError = 'File is not a replay';
       return;
     }
 
     const form = new FormData();
-    form.append("replay", files[0]);
+    form.append("type", type);
+    if (file && type === "replay")
+      form.append("replay", file);
     form.append("comment", comment);
+    if (type === "link")
+      form.append("link", link);
+
+    console.log(form);
 
     uploading = true;
 
@@ -80,7 +85,7 @@
         method: "POST",
         body: form,
       });
-  
+
       if (!response.body) {
         throw "why????";
       }
@@ -197,38 +202,70 @@
     </div>
   {/if}
 
-  <input
-    bind:this={input}
-    class="file-input"
-    type="file"
-    accept=".osr"
-    onchange={onInputChange}
-  />
-  <div
-    class="dropzone"
-    class:hovering={hovering}
-    onclick={onDropzoneClick}
-    ondragover={onDropzoneDragover}
-    ondragleave={onDropzoneDragleave}
-    ondrop={onDropzoneDrop}
-  >
-    {#if !uploading}
-      {#if uploadError != ''}
-        <CircleX />
-        {uploadError}
-      {:else}
-        {#if hovering}
-          <Upload />
-          <span>Upload replay...</span>
+  <div class="upload">
+    <input
+      bind:this={input}
+      class="file-input"
+      type="file"
+      accept=".osr"
+      onchange={onInputChange}
+    />
+    <div
+      class="dropzone"
+      class:hovering={hovering}
+      onclick={onDropzoneClick}
+      ondragover={onDropzoneDragover}
+      ondragleave={onDropzoneDragleave}
+      ondrop={onDropzoneDrop}
+    >
+      {#if !uploading}
+        {#if uploadError != ''}
+          <CircleX />
+          {uploadError}
         {:else}
-          <Clapperboard />
-          <span>Drop your replay here</span>
+          {#if hovering}
+            <Upload />
+            <span>Upload replay...</span>
+          {:else}
+            <Clapperboard />
+            <span>Drop your replay here</span>
+          {/if}
         {/if}
+      {:else}
+        <LoaderPinwheel class="loader" />
+        <span>{uploadMessage}</span>
       {/if}
-    {:else}
-      <LoaderPinwheel class="loader" />
-      <span>{uploadMessage}</span>
-    {/if}
+    </div>
+    <div class="divider"></div>
+    <Button
+      variant='secondary'
+      onclick={() => handleUpload("resubmit")}
+      disabled={!!data.lastRequest?.watched_at}
+      title={data.lastRequest?.watched_at ? "Your last replay has been already guessed" : undefined}
+    >
+      Resubmit last play
+    </Button>
+    <div class="divider"></div>
+    <div class="link-upload">
+      <div class="input">
+        <Input
+          bind:value={link}
+          type="text"
+          placeholder="Score link"
+          maxlength="100"
+          bind:disabled={uploading}
+        />
+        <span class="input-footer">
+          please make sure replay is available
+        </span>
+      </div>
+      <Button
+        variant='submit'
+        onclick={() => handleUpload("link")}
+      >
+        Submit
+      </Button>
+    </div>
   </div>
 {/if}
 
@@ -286,7 +323,6 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    // align-items: center;
     gap: 8px;
     margin-bottom: 8px;
   }
@@ -296,11 +332,42 @@
     color: #888;
   }
 
+  .upload {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+
+    margin-bottom: 16px;
+  }
+
+  .divider {
+    width: 1px;
+    max-width: 1px;
+    min-height: 70px;
+    max-height: 70px;
+    flex: 1;
+    background: #888;
+  }
+
+  @media screen and (max-width: 768px) {
+    .upload {
+      flex-direction: column;
+    }
+
+    .divider {
+      min-height: 1px;
+      max-height: 1px;
+      align-self: unset;
+      width: 100px;
+      max-width: 100vw;
+    }
+  }
+
   .dropzone {
     min-width: 250px;
     min-height: 80px;
-
-    margin-bottom: 16px;
 
     display: flex;
     justify-content: center;
@@ -317,6 +384,20 @@
 
     &:hover {
       background: #fff1;
+    }
+  }
+
+  .link-upload {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+
+    .input {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
     }
   }
 </style>
