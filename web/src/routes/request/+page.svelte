@@ -250,8 +250,8 @@
     <Button
       variant='secondary'
       onclick={() => handleUpload("resubmit")}
-      disabled={!!data.lastRequest?.watched_at}
-      title={data.lastRequest?.watched_at ? "Your last replay has been already guessed" : undefined}
+      disabled={!data.lastRequest || !!data.lastRequest?.watched_at}
+      title={(!data.lastRequest || data.lastRequest?.watched_at) ? "Your last replay has been already guessed" : undefined}
     >
       Resubmit last play
     </Button>
