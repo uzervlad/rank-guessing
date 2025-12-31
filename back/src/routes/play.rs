@@ -1,13 +1,9 @@
 use std::sync::atomic::Ordering;
 
 use axum::{
-	Json, Router,
-	extract::{Path, Query, Request, State},
-	http::{HeaderValue, StatusCode, header},
-	middleware,
-	response::IntoResponse,
-	routing::{get, post},
+	Json, Router, extract::{Path, Query, Request, State}, http::{HeaderValue, StatusCode, header}, middleware, response::IntoResponse, routing::{get, post}
 };
+use chrono::{Duration, Utc};
 use rosu_v2::model::GameMode;
 use serde::{Deserialize, Serialize};
 use tower::ServiceExt;
@@ -174,6 +170,19 @@ async fn submit_guess(
 			&state.db, request.id, body.guess, real_rank,
 		)
 		.await;
+
+		let vod_link = match state.twitch.lock().unwrap().as_ref() {
+			Some(twitch) => {
+				let timestamp = Utc::now() - Duration::seconds(30);
+				let link = twitch.get_link_at(timestamp);
+				Some(link)
+			},
+			_ => None,
+		};
+
+		if let Some(link) = vod_link {
+			let _ = database::requests::attach_vod_to_request(&state.db, request.id, &link).await;
+		}
 	}
 
 	state.state.ready_sub();

@@ -6,7 +6,7 @@ use axum::{Json, Router, extract::State, routing::get};
 use back::{
 	replay::Replay,
 	routes,
-	state::{AAxumState, AxumState},
+	state::{AAxumState, AxumState}, twitch::twitch_thread,
 };
 use eyre::Result;
 use serde::Serialize;
@@ -24,6 +24,8 @@ async fn main() -> Result<()> {
 
 	let state = AxumState::new(db.clone()).await?;
 	let state = Arc::new(state);
+
+	twitch_thread(state.config.clone(), state.twitch.clone());
 
 	let app = Router::new()
 		.route("/", get(root))

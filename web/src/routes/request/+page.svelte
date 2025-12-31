@@ -153,7 +153,13 @@
   <span class="request">Your ID is: <code>{data.request.id}</code></span>
 
   {#if data.request.watched_at}
-    <span>Your replay was watched at {new Date(data.request.watched_at).toLocaleString()}</span>
+    {#if data.request.vod_link}
+      <a href={data.request.vod_link}>
+        <span>Your replay was watched at {new Date(data.request.watched_at).toLocaleString()}</span>
+      </a>
+    {:else}
+      <span>Your replay was watched at {new Date(data.request.watched_at).toLocaleString()}</span>
+    {/if}
   {:else}
     {#if data.session.allow_comments}
       <div class="comment">

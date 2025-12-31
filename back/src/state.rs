@@ -2,16 +2,18 @@ use std::{
 	env,
 	sync::{
 		Arc,
+		Mutex,
 		atomic::{AtomicI64, AtomicUsize, Ordering},
 	},
 };
 
 use axum::body::Bytes;
+use chrono::{DateTime, TimeDelta, Utc};
 use eyre::Result;
 use rosu_v2::Osu;
 use serde::Serialize;
 use sqlx::SqlitePool;
-use tokio::sync::broadcast::{self, Receiver, Sender};
+use tokio::sync::{broadcast::{self, Receiver, Sender}};
 
 use crate::{database::{self, requests::RequestsCount}, emotes::fetch_emotes};
 
@@ -54,6 +56,8 @@ pub struct AppConfig {
 	pub frontend_url: String,
 	pub guesser_id: u64,
 	pub admin_id: u64,
+	pub twitch_client_id: String,
+	pub twitch_client_secret: String,
 }
 
 impl AppConfig {
@@ -64,6 +68,8 @@ impl AppConfig {
 			frontend_url: env::var("FRONTEND_URL")?,
 			guesser_id: env::var("GUESSER_ID")?.parse()?,
 			admin_id: env::var("ADMIN_ID")?.parse()?,
+			twitch_client_id: env::var("TWITCH_CLIENT_ID")?,
+			twitch_client_secret: env::var("TWITCH_CLIENT_SECRET")?,
 		})
 	}
 }
@@ -162,10 +168,33 @@ impl ArcAppStateTrait for Arc<AppState> {
 	}
 }
 
+pub struct TwitchState {
+	pub vod_id: String,
+	pub started_at: DateTime<Utc>,
+}
+
+fn format_vod_timestamp(timestamp: TimeDelta) -> String {
+	let mut seconds = timestamp.num_seconds();
+	let hours = seconds / 3600;
+	seconds %= 3600;
+	let minutes = seconds / 60;
+	seconds %= 60;
+
+	format!("{hours:02}h{minutes:02}m{seconds:02}s")
+}
+
+impl TwitchState {
+	pub fn get_link_at(&self, at: DateTime<Utc>) -> String {
+		let timestamp = format_vod_timestamp(at - self.started_at);
+		format!("https://www.twitch.tv/videos/{}?t={}", self.vod_id, timestamp)
+	}
+}
+
 pub struct AxumState {
 	pub config: Arc<AppConfig>,
 	pub state: Arc<AppState>,
 	pub emotes: Bytes,
+	pub twitch: Arc<Mutex<Option<TwitchState>>>,
 	pub db: SqlitePool,
 	pub osu: Osu,
 }
@@ -199,6 +228,7 @@ impl AxumState {
 			config,
 			state,
 			emotes,
+			twitch: Arc::new(Mutex::new(None)),
 			db,
 			osu,
 		})

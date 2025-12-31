@@ -20,6 +20,7 @@ pub struct DbRequest {
 	pub ready: bool,
 	pub submitted_at: DateTime<Utc>,
 	pub watched_at: Option<DateTime<Utc>>,
+	pub vod_link: Option<String>,
 	pub guessed_rank: i64,
 	pub real_rank: i64,
 	pub comment: String,
@@ -37,6 +38,7 @@ pub struct DbRequestWithBeatmap {
 	pub r_ready: bool,
 	pub r_submitted_at: DateTime<Utc>,
 	pub r_watched_at: Option<DateTime<Utc>>,
+	pub r_vod_link: Option<String>,
 	pub r_guessed_rank: i64,
 	pub r_real_rank: i64,
 	pub r_comment: String,
@@ -69,6 +71,7 @@ impl From<DbRequestWithBeatmap> for RequestWithBeatmap {
 				ready: value.r_ready,
 				submitted_at: value.r_submitted_at,
 				watched_at: value.r_watched_at,
+				vod_link: value.r_vod_link,
 				guessed_rank: value.r_guessed_rank,
 				real_rank: value.r_real_rank,
 				comment: value.r_comment,
@@ -96,6 +99,7 @@ const EXTENDED_SELECT: &'static str = r#"
 	r.ready as r_ready,
 	r.submitted_at as r_submitted_at,
 	r.watched_at as r_watched_at,
+	r.vod_link as r_vod_link,
 	r.guessed_rank as r_guessed_rank,
 	r.real_rank as r_real_rank,
 	r.comment as r_comment,
@@ -310,6 +314,27 @@ pub async fn mark_as_guessed_request(
 	.bind(Utc::now())
 	.bind(guessed_rank)
 	.bind(real_rank)
+	.execute(pool)
+	.await?;
+
+	Ok(())
+}
+
+pub async fn attach_vod_to_request(
+	pool: &SqlitePool,
+	request_id: i64,
+	link: &str,
+) -> Result<()> {
+	sqlx::query(
+		r#"
+		update requests
+		set
+			vod_link = $2
+		where id = $1
+	"#,
+	)
+	.bind(request_id)
+	.bind(link)
 	.execute(pool)
 	.await?;
 

@@ -13,6 +13,7 @@ export type ApiRequest = {
   ready: boolean;
   submitted_at: string;
   watched_at: string | null;
+  vod_link: string | null;
   guessed_rank: number | null;
   real_rank: number | null;
   comment: string | null;

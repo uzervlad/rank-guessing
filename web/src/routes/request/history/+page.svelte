@@ -32,7 +32,11 @@
       <td>{new Date(request.submitted_at).toLocaleString()}</td>
       <td>
         {#if request.watched_at}
-          {new Date(request.watched_at).toLocaleString()}
+          {#if request.vod_link}
+            <a href={request.vod_link}>{new Date(request.watched_at).toLocaleString()}</a>
+          {:else}
+            {new Date(request.watched_at).toLocaleString()}
+          {/if}
         {/if}
       </td>
       <td>
