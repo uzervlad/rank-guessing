@@ -155,29 +155,33 @@
   {#if data.request.watched_at}
     <span>Your replay was watched at {new Date(data.request.watched_at).toLocaleString()}</span>
   {:else}
-    <div class="comment">
-      <Input
-        bind:value={comment}
-        type="text"
-        placeholder="Comment (optional)"
-        maxlength="100"
-        style="width: 100%"
-        bind:disabled={updating}
-      />
-      <span class="input-footer">max 100 characters, please don't spoil</span>
-      <span class="input-footer">supports FFZ/BTTV/7TV emotes</span>
-    </div>
+    {#if data.session.allow_comments}
+      <div class="comment">
+        <Input
+          bind:value={comment}
+          type="text"
+          placeholder="Comment (optional)"
+          maxlength="100"
+          style="width: 100%"
+          bind:disabled={updating}
+        />
+        <span class="input-footer">max 100 characters, please don't spoil</span>
+        <span class="input-footer">supports FFZ/BTTV/7TV emotes</span>
+      </div>
+    {/if}
 
     <div class="buttons">
-      <Button variant='secondary' bind:disabled={updating} onclick={updateComment}>
-        {#if updating && updateSuccess}
-          <Check style="margin-bottom: -6px;" />
-        {:else if updating}
-          <Ellipsis style="margin-bottom: -6px;" />
-        {:else}
-          Update comment
-        {/if}
-      </Button>
+      {#if data.session.allow_comments}
+        <Button variant='secondary' bind:disabled={updating} onclick={updateComment}>
+          {#if updating && updateSuccess}
+            <Check style="margin-bottom: -6px;" />
+          {:else if updating}
+            <Ellipsis style="margin-bottom: -6px;" />
+          {:else}
+            Update comment
+          {/if}
+        </Button>
+      {/if}
       <Button variant='danger' onclick={cancelRequest}>
         Cancel request
       </Button>
