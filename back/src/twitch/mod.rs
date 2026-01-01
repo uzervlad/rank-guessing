@@ -6,6 +6,8 @@ use serde::Deserialize;
 
 use crate::state::{AppConfig, TwitchState};
 
+const USER_ID: &'static str = "136877209";
+
 #[derive(Deserialize)]
 struct TokenResponse {
 	access_token: String,
@@ -42,7 +44,7 @@ impl TwitchClient {
 			client,
 			config,
 			access_token: response.access_token,
-			expires_at: Utc::now() + chrono::Duration::seconds((response.expires_in - 120) as _),
+			expires_at: Utc::now() + chrono::Duration::seconds(response.expires_in.saturating_sub(120) as _),
 		})
 	}
 
@@ -61,7 +63,7 @@ impl TwitchClient {
 			.await?;
 
 		self.access_token = response.access_token;
-		self.expires_at = Utc::now() + chrono::Duration::seconds((response.expires_in - 120) as _);
+		self.expires_at = Utc::now() + chrono::Duration::seconds(response.expires_in.saturating_sub(120) as _);
 
 		Ok(())
 	}
@@ -70,23 +72,43 @@ impl TwitchClient {
 		Utc::now() > self.expires_at
 	}
 
-	async fn get_streams(&mut self, user: &str) -> Result<StreamsResponse> {
+	async fn get_streams(&mut self, user_id: &str) -> Result<Vec<Stream>> {
 		if self.token_expired() {
 			self.refresh().await?;
 		}
 
 		let streams = self.client
 			.get("https://api.twitch.tv/helix/streams")
-			.query(&[("user_login", user)])
+			.query(&[("user_id", user_id)])
 			.header("Client-ID", &self.config.twitch_client_id)
 			.bearer_auth(&self.access_token)
 			.send()
 			.await?
-			.error_for_status()?
 			.json::<StreamsResponse>()
 			.await?;
 
-		Ok(streams)
+		Ok(streams.data)
+	}
+
+	async fn get_videos(&mut self, user_id: &str) -> Result<Vec<Video>> {
+		if self.token_expired() {
+			self.refresh().await?;
+		}
+
+		let videos = self.client
+			.get("https://api.twitch.tv/helix/videos")
+			.query(&[
+				("user_id", user_id),
+				("type", "archive"),
+			])
+			.header("Client-ID", &self.config.twitch_client_id)
+			.bearer_auth(&self.access_token)
+			.send()
+			.await?
+			.json::<VideosResponse>()
+			.await?;
+
+		Ok(videos.data)
 	}
 }
 
@@ -101,21 +123,59 @@ struct Stream {
 	started_at: DateTime<Utc>,
 }
 
+#[derive(Debug, Deserialize)]
+struct VideosResponse {
+	data: Vec<Video>,
+}
+
+#[derive(Debug, Deserialize)]
+struct Video {
+	id: String,
+	stream_id: String,
+}
+
 pub async fn twitch_thread(
 	config: Arc<AppConfig>,
 	state: Arc<Mutex<Option<TwitchState>>>
 ) -> Result<()> {
 	let mut client = TwitchClient::new(config).await?;
 
+	let mut current_stream_id = None;
+
 	loop {
-		match client.get_streams("koifishu").await {
+		match client.get_streams(USER_ID).await {
 			Ok(streams) => {
-				match streams.data.first() {
-					Some(stream) => *state.lock().unwrap() = Some(TwitchState {
-						vod_id: stream.id.clone(),
-						started_at: stream.started_at.clone(),
-					}),
-					None => *state.lock().unwrap() = None,
+				match streams.first() {
+					Some(stream) => {
+						match current_stream_id {
+							Some(ref stream_id) if *stream_id == stream.id => {},
+							_ => {
+								current_stream_id = Some(stream.id.clone());
+
+								match client.get_videos(USER_ID).await {
+									Ok(videos) => {
+										let video = videos.iter()
+											.find(|v| v.stream_id == stream.id);
+
+										if let Some(video) = video {
+											*state.lock().unwrap() = Some(TwitchState {
+												vod_id: video.id.clone(),
+												started_at: stream.started_at.clone(),
+											});
+										}
+									},
+									_ => {
+										current_stream_id = None;
+										*state.lock().unwrap() = None;
+									}
+								}
+							},
+						}
+					}
+					_ => {
+						current_stream_id = None;
+						*state.lock().unwrap() = None;
+					}
 				}
 			},
 			_ => {},
