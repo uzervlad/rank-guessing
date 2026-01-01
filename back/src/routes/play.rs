@@ -173,7 +173,7 @@ async fn submit_guess(
 
 		let vod_link = match state.twitch.lock().unwrap().as_ref() {
 			Some(twitch) => {
-				let timestamp = Utc::now() - Duration::seconds(30);
+				let timestamp = Utc::now() - Duration::seconds(10);
 				let link = twitch.get_link_at(timestamp);
 				Some(link)
 			},
