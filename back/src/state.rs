@@ -185,7 +185,7 @@ fn format_vod_timestamp(timestamp: TimeDelta) -> String {
 
 impl TwitchState {
 	pub fn get_link_at(&self, at: DateTime<Utc>) -> String {
-		let timestamp = format_vod_timestamp(at - self.started_at);
+		let timestamp = format_vod_timestamp((at - self.started_at).max(TimeDelta::zero()));
 		format!("https://www.twitch.tv/videos/{}?t={}", self.vod_id, timestamp)
 	}
 }
