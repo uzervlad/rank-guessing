@@ -25,7 +25,11 @@ async fn main() -> Result<()> {
 	let state = AxumState::new(db.clone()).await?;
 	let state = Arc::new(state);
 
-	twitch_thread(state.config.clone(), state.twitch.clone());
+	let _config = state.config.clone();
+	let _twitch = state.twitch.clone();
+	tokio::spawn(async move {
+		twitch_thread(_config, _twitch).await;
+	});
 
 	let app = Router::new()
 		.route("/", get(root))
