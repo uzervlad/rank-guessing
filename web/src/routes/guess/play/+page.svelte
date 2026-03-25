@@ -13,12 +13,16 @@
   import CircleX from "@lucide/svelte/icons/circle-x";
   import CircleCheck from "@lucide/svelte/icons/circle-check";
   import CircleAlert from "@lucide/svelte/icons/circle-alert";
+  import PartyPopper from "@lucide/svelte/icons/party-popper";
   import Back from "$lib/components/Back.svelte";
   import Spoiler from "$lib/components/Spoiler.svelte";
   import Comment from "$lib/components/Comment.svelte";
+  import Confetti from "$lib/components/Confetti.svelte";
 
   const { data } = $props();
   
+  let confetti: Confetti;
+
   const emotes = new Emotes();
 
   let reader: Reader | undefined;
@@ -122,6 +126,9 @@
 </script>
 
 <Back to ='/guess' />
+<PartyPopper class="confetti" onclick={() => confetti.spawnBurst()} />
+
+<Confetti bind:this={confetti} auto={!!result?.response && (result.response.rank === result.response.guess)} />
 
 <div class="settings">
   <a href='/guess/rename'>
@@ -384,5 +391,13 @@
     display: flex;
     align-items: center;
     gap: 8px;
+  }
+
+  :global(.confetti) {
+    position: absolute;
+    top: 12px;
+    left: 40px;
+
+    cursor: pointer;
   }
 </style>
