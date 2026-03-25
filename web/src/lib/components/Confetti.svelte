@@ -37,7 +37,7 @@
     if (!auto) return;
     burstTimeout = setTimeout(() => {
       spawnBurst();
-    }, 1000 + Math.random() * 500);
+    }, 800 + Math.random() * 300);
   }
 
   export const spawnBurst = () => {
@@ -46,13 +46,13 @@
 
     for (let i = 0; i < count; i++) {
       particles.push({
-        x: fromLeft ? -10 : canvas.width + 10,
+        x: fromLeft ? -20 : canvas.width + 20,
         y: Math.random() * canvas.height * 0.6 + canvas.height * 0.2,
-        vx: (fromLeft ? 1 : -1) * (3 + Math.random() * 10),
-        vy: (Math.random() - 0.5) * 30,
+        vx: (fromLeft ? 1 : -1) * (350 + Math.random() * 850),
+        vy: (Math.random() - 0.55) * 2000,
         size: 4 + Math.random() * 3,
         color: COLORS[Math.floor(Math.random() * COLORS.length)],
-        life: 3000,
+        life: 3,
       });
     }
 
@@ -71,7 +71,7 @@
   });
 
   const render = (ms: number) => {
-    let delta = ms - lastMs;
+    let delta = (ms - lastMs) / 1000;
     lastMs = ms;
 
     animationId = requestAnimationFrame(render);
@@ -81,16 +81,15 @@
     for (let i = particles.length - 1; i >= 0; i--) {
       let p = particles[i];
 
-      p.x += p.vx;
-      p.y += p.vy;
-      p.vy += 0.017 * delta;
+      p.x += p.vx * delta;
+      p.y += p.vy * delta;
+      p.vy += 1700 * delta;
       p.life -= delta;
 
       ctx.fillStyle = p.color;
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
       ctx.fill();
-      // ctx.fillRect(p.x, p.y, p.size, p.size);
 
       if (p.life <= 0) particles.splice(i, 1);
     }
