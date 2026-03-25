@@ -140,42 +140,27 @@ pub async fn twitch_thread(
 ) -> Result<()> {
 	let mut client = TwitchClient::new(config).await?;
 
-	let mut current_stream_id = None;
-
 	loop {
 		match client.get_streams(USER_ID).await {
 			Ok(streams) => {
 				match streams.first() {
 					Some(stream) => {
-						match current_stream_id {
-							Some(ref stream_id) if *stream_id == stream.id => {},
-							_ => {
-								current_stream_id = Some(stream.id.clone());
+						match client.get_videos(USER_ID).await {
+							Ok(videos) => {
+								let video = videos.iter()
+									.find(|v| v.stream_id == stream.id);
 
-								match client.get_videos(USER_ID).await {
-									Ok(videos) => {
-										let video = videos.iter()
-											.find(|v| v.stream_id == stream.id);
-
-										if let Some(video) = video {
-											*state.lock().unwrap() = Some(TwitchState {
-												vod_id: video.id.clone(),
-												started_at: stream.started_at.clone(),
-											});
-										}
-									},
-									_ => {
-										current_stream_id = None;
-										*state.lock().unwrap() = None;
-									}
+								if let Some(video) = video {
+									*state.lock().unwrap() = Some(TwitchState {
+										vod_id: video.id.clone(),
+										started_at: stream.started_at.clone(),
+									});
 								}
 							},
+							_ => *state.lock().unwrap() = None
 						}
 					}
-					_ => {
-						current_stream_id = None;
-						*state.lock().unwrap() = None;
-					}
+					_ => *state.lock().unwrap() = None
 				}
 			},
 			_ => {},
