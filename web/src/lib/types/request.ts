@@ -17,4 +17,5 @@ export type ApiRequest = {
   guessed_rank: number | null;
   real_rank: number | null;
   comment: string | null;
+	additional_notes: string | null;
 };

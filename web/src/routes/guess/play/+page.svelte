@@ -14,6 +14,7 @@
   import CircleCheck from "@lucide/svelte/icons/circle-check";
   import CircleAlert from "@lucide/svelte/icons/circle-alert";
   import PartyPopper from "@lucide/svelte/icons/party-popper";
+	import Info from "@lucide/svelte/icons/info";
   import Back from "$lib/components/Back.svelte";
   import Spoiler from "$lib/components/Spoiler.svelte";
   import Comment from "$lib/components/Comment.svelte";
@@ -217,6 +218,12 @@
               <CircleAlert color="yellow" /> <span title="This replay was submitted during a previous session">Wrong session</span>
             </li>
           {/if}
+
+					{#if request.additional_notes}
+						<li>
+							<Info color="cyan" /> <span>{request.additional_notes}</span>
+						</li>
+					{/if}
 
           {#if request.watched_at}
             <li>

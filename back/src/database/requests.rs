@@ -24,6 +24,7 @@ pub struct DbRequest {
 	pub guessed_rank: i64,
 	pub real_rank: i64,
 	pub comment: String,
+	pub additional_notes: Option<String>,
 }
 
 #[derive(FromRow)]
@@ -42,6 +43,7 @@ pub struct DbRequestWithBeatmap {
 	pub r_guessed_rank: i64,
 	pub r_real_rank: i64,
 	pub r_comment: String,
+	pub r_additional_notes: Option<String>,
 
 	pub b_id: i64,
 	pub b_beatmapset_id: i64,
@@ -75,6 +77,7 @@ impl From<DbRequestWithBeatmap> for RequestWithBeatmap {
 				guessed_rank: value.r_guessed_rank,
 				real_rank: value.r_real_rank,
 				comment: value.r_comment,
+				additional_notes: value.r_additional_notes,
 			},
 			beatmap: DbBeatmap {
 				id: value.b_id,
@@ -103,6 +106,7 @@ const EXTENDED_SELECT: &'static str = r#"
 	r.guessed_rank as r_guessed_rank,
 	r.real_rank as r_real_rank,
 	r.comment as r_comment,
+	r.additional_notes as r_additional_notes,
 
 	b.id as b_id,
 	b.beatmapset_id as b_beatmapset_id,
