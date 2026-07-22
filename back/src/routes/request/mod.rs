@@ -14,8 +14,7 @@ use serde::{Deserialize, Serialize};
 use tower_http::limit::RequestBodyLimitLayer;
 
 use crate::{
-	auth::{self, UserExtension}, database::{self, requests::DbRequest},
-	routes::request::{multipart::{UploadMultipart, UploadType}, upload::process_replay}, state::{AAxumState, ArcAppStateTrait}
+	auth::{self, UserExtension}, database::{self, beatmaps::DbBeatmap, requests::DbRequest}, routes::request::{multipart::{UploadMultipart, UploadType}, upload::process_replay}, state::{AAxumState, ArcAppStateTrait}
 };
 
 mod upload;
@@ -24,6 +23,7 @@ mod multipart;
 #[derive(Serialize)]
 struct RequestResponse {
 	request: Option<DbRequest>,
+	beatmap: Option<DbBeatmap>,
 }
 
 async fn get_current_request(
@@ -38,7 +38,15 @@ async fn get_current_request(
 		return (StatusCode::INTERNAL_SERVER_ERROR, "Unknown database error").into_response();
 	};
 
-	Json(RequestResponse { request }).into_response()
+	let beatmap = match request.as_ref() {
+		Some(request) => match database::beatmaps::get_beatmap(&state.db, request.beatmap_id).await {
+			Ok(beatmap) => beatmap,
+			_ => return (StatusCode::INTERNAL_SERVER_ERROR, "Unknown database error").into_response(),
+		},
+		None => None,
+	};
+
+	Json(RequestResponse { request, beatmap }).into_response()
 }
 
 async fn get_last_request(
@@ -51,7 +59,7 @@ async fn get_last_request(
 		return (StatusCode::INTERNAL_SERVER_ERROR, "Unknown database error").into_response();
 	};
 
-	Json(RequestResponse { request }).into_response()
+	Json(RequestResponse { request, beatmap: None }).into_response()
 }
 
 async fn get_requests(user: UserExtension, State(state): State<AAxumState>) -> impl IntoResponse {

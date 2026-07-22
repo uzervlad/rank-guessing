@@ -19,6 +19,7 @@
   import Spoiler from "$lib/components/Spoiler.svelte";
   import Comment from "$lib/components/Comment.svelte";
   import Confetti from "$lib/components/Confetti.svelte";
+  import Beatmap from "$lib/components/Beatmap.svelte";
 
   const { data } = $props();
   
@@ -172,13 +173,7 @@
 {#if request && beatmap}
   <div class="request">
     <div>
-      <div class="beatmap">
-        <img src={`https://assets.ppy.sh/beatmaps/${beatmap.beatmapset_id}/covers/cover.jpg`} alt="beatmap cover" class="cover">
-        <div class="info">
-          <span class="title">{beatmap.artist} - {beatmap.title}</span>
-          <span class="difficulty">[{beatmap.version}] by {beatmap.creator}</span>
-        </div>
-      </div>
+      <Beatmap beatmap={beatmap} />
       <div class="analysis">
         <ul>
           <li>
@@ -332,25 +327,6 @@
       > div {
         width: calc(100vw - 16px);
       }
-    }
-  }
-
-  .beatmap {
-    background: #333;
-    border: 1px solid #888;
-    border-radius: 8px;
-    overflow: hidden;
-
-    .cover {
-      max-width: 100%;
-    }
-
-    .info {
-      margin: 10px;
-
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
     }
   }
 

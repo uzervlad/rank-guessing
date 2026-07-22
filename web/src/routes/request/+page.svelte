@@ -1,7 +1,9 @@
 <script lang="ts">
   import Button from '$lib/components/Button.svelte';
   import Input from '$lib/components/Input.svelte';
+  import Beatmap from '$lib/components/Beatmap.svelte';
   import { sseListen } from '$lib/sse';
+  import { headers } from '$lib/fetch.js';
 
   import type { DragEventHandler } from 'svelte/elements';
 
@@ -11,7 +13,6 @@
   import CircleX from "@lucide/svelte/icons/circle-x";
   import Check from "@lucide/svelte/icons/check";
   import Ellipsis from "@lucide/svelte/icons/ellipsis";
-    import { headers } from '$lib/fetch.js';
 
   const { data } = $props();
 
@@ -147,8 +148,12 @@
 {#if !data.session}
   <h2>Submissions are closed</h2>
   <h2>Come back next stream!</h2>
-{:else if data.request}
+{:else if data.request && data.beatmap}
   <h2>You have submitted a replay</h2>
+
+  <div class="beatmap">
+    <Beatmap beatmap={data.beatmap} />
+  </div>
 
   <span class="request">Your ID is: <code>{data.request.id}</code></span>
 
@@ -301,6 +306,11 @@
 
   .file-input {
     display: none;
+  }
+
+  .beatmap {
+    max-width: 400px;
+    margin-bottom: 8px;
   }
 
   h2, .request {
