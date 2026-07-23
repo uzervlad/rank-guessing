@@ -359,12 +359,6 @@ pub async fn delete_request(pool: &SqlitePool, request_id: i64) -> Result<()> {
 	Ok(())
 }
 
-pub async fn delete_all_requests(pool: &SqlitePool) -> Result<()> {
-	sqlx::query("delete from requests").execute(pool).await?;
-
-	Ok(())
-}
-
 #[derive(FromRow, Default)]
 pub struct RequestsCount {
 	pub total: i64,

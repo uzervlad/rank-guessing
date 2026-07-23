@@ -195,27 +195,11 @@ async fn submit_guess(
 	.into_response()
 }
 
-async fn delete_everything(State(state): State<AAxumState>) -> (StatusCode, &'static str) {
-	match database::requests::delete_all_requests(&state.db).await {
-		Ok(_) => {
-			state.state.total_submissions.store(0, Ordering::SeqCst);
-			state.state.ready_submissions.store(0, Ordering::SeqCst);
-
-			(
-				StatusCode::INTERNAL_SERVER_ERROR,
-				"Unexpected database error",
-			)
-		},
-		_ => (StatusCode::OK, "OK"),
-	}
-}
-
 pub fn router(state: AAxumState) -> Router<AAxumState> {
 	Router::new()
 		.route("/request", get(get_request).delete(delete_request))
 		.route("/replay/{id}", get(download_replay))
 		.route("/guess", post(submit_guess))
-		.route("/reset", post(delete_everything))
 		.layer(middleware::from_fn(auth::guesser_middleware))
 		.layer(middleware::from_fn_with_state(state, auth::user_middleware))
 }
