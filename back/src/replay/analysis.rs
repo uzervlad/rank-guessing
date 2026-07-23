@@ -96,8 +96,8 @@ pub trait ReplayAnalysisTrait {
 	fn client_state(&self) -> ClientState;
 }
 
-const STABLE_COMPATIBLE_MODS: [&str; 13] = [
-	"EZ", "NF", "HT", "DC", "HR", "SD", "PF", "DT", "NC", "HD", "FL", "RX", "AP",
+const STABLE_COMPATIBLE_MODS: [&str; 14] = [
+	"EZ", "NF", "HT", "DC", "HR", "SD", "PF", "DT", "NC", "HD", "FL", "RX", "AP", "AC",
 ];
 
 #[derive(Deserialize)]
@@ -123,7 +123,7 @@ impl ScoreInfoMod {
 
 		match self.acronym.as_str() {
 			"DT" | "HT" | "NC" | "DC" => !settings.contains_key(&"speed_change".to_string()),
-			"SD" | "PF" => true,
+			"SD" | "PF" | "AC" => true,
 			_ => false,
 		}
 	}
