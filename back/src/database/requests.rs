@@ -345,6 +345,26 @@ pub async fn attach_vod_to_request(
 	Ok(())
 }
 
+pub async fn set_additional_notes(
+	pool: &SqlitePool,
+	request_id: i64,
+	note: Option<String>,
+) -> Result<()> {
+	sqlx::query(
+		r#"
+		update requests
+			set additional_notes = $2
+		where id = $1
+		"#,
+	)
+	.bind(request_id)
+	.bind(note)
+	.execute(pool)
+	.await?;
+
+	Ok(())
+}
+
 pub async fn delete_request(pool: &SqlitePool, request_id: i64) -> Result<()> {
 	sqlx::query(
 		r#"

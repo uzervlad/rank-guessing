@@ -85,7 +85,7 @@ pub async fn user_middleware(
 }
 
 pub async fn guesser_middleware(user: UserExtension, request: Request, next: Next) -> Response {
-	if !user.is_guesser {
+	if !user.is_admin && !user.is_guesser {
 		return (StatusCode::FORBIDDEN, "Forbidden").into_response();
 	}
 

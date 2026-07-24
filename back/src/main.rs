@@ -39,6 +39,7 @@ async fn main() -> Result<()> {
 		.nest("/request", routes::request::router(state.clone()))
 		.nest("/state", routes::state::router())
 		.nest("/emotes", routes::emotes::router())
+		.nest("/admin", routes::admin::router(state.clone()))
 		.with_state(state);
 
 	let listener = TcpListener::bind("0.0.0.0:3999").await?;
