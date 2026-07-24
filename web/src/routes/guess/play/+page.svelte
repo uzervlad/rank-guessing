@@ -24,6 +24,7 @@
   const { data } = $props();
   
   let confetti: Confetti;
+  let nuhuh = $state(false);
 
   const emotes = new Emotes();
 
@@ -128,7 +129,15 @@
 </script>
 
 <Back to ='/guess' />
-<PartyPopper class="confetti" onclick={() => confetti.spawnBurst()} />
+<PartyPopper class={nuhuh ? "confetti confetti-hide" : "confetti"} onclick={() => nuhuh = true} />
+
+<div class={nuhuh ? "nuh-uh show" : "nuh-uh"}>
+  <img src="https://a.ppy.sh/9211305" alt="octo" class="avatar">
+
+  <div class="message">
+    nuh uh, gotta work for it.
+  </div>
+</div>
 
 <Confetti bind:this={confetti} auto={!!result?.response && (result.response.rank === result.response.guess)} />
 
@@ -282,6 +291,63 @@
 {/if}
 
 <style lang="scss">
+  @keyframes nuhuh {
+    20% {
+      opacity: 1;
+      transform: translateY(10px) rotate(3deg);
+    }
+    80% {
+      opacity: 1;
+      transform: translateY(10px) rotate(3deg);
+    }
+    100% {
+      transform: rotate(5deg);
+    }
+  }
+
+  .nuh-uh {
+    position: absolute;
+    top: 12px;
+    left: 48px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    pointer-events: none;
+    user-select: none;
+
+    opacity: 0;
+
+    .avatar {
+      width: 48px;
+      height: 48px;
+      object-fit: cover;
+    }
+
+    .message {
+      position: relative;
+      background: #181818;
+      border-radius: 4px;
+      padding: 8px 12px;
+
+      &::after {
+        content: '';
+        position: absolute;
+        top: -10px;
+        left: 15px;
+        width: 20px;
+        height: 10px;
+        background: #181818;
+        clip-path: polygon(50% 0, 0% 100%, 100% 100%);
+      }
+    }
+
+    &.show {
+      animation: nuhuh 3s forwards;
+    }
+  }
+
   .settings {
     display: flex;
     gap: 8px;
@@ -382,5 +448,12 @@
     left: 40px;
 
     cursor: pointer;
+
+    transition: .4s ease-in-out;
+  }
+
+  :global(.confetti-hide) {
+    top: -12px;
+    opacity: 0;
   }
 </style>
