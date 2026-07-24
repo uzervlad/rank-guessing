@@ -13,17 +13,16 @@ pub struct Emote {
 
 pub async fn fetch_emotes() -> Vec<Emote> {
 	let mut emotes = vec![];
-	emotes.append(
-		&mut ffz::fetch_emotes().await
-			.unwrap_or_default()
+
+	let (ffz, bttv, seventv) = tokio::join!(
+		ffz::fetch_emotes(),
+		bttv::fetch_emotes(),
+		seventv::fetch_emotes(),
 	);
-	emotes.append(
-		&mut bttv::fetch_emotes().await
-			.unwrap_or_default()
-	);
-	emotes.append(
-		&mut seventv::fetch_emotes().await
-			.unwrap_or_default()
-	);
+
+	emotes.append(&mut ffz.unwrap_or_default());
+	emotes.append(&mut bttv.unwrap_or_default());
+	emotes.append(&mut seventv.unwrap_or_default());
+
 	emotes
 }
